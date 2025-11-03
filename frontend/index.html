@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forum Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Project 4 Forum</h1>
+
+    <div id="auth-forms">
+      <!-- Register Form -->
+      <div id="registerForm" class="form active">
+        <h2>Register</h2>
+        <input type="text" id="registerUsername" placeholder="Username" required />
+        <input type="email" id="registerEmail" placeholder="Email" required />
+        <input type="password" id="registerPassword" placeholder="Password" required />
+        <button onclick="register()">Sign Up</button>
+        <p>Already have an account? <a href="#" onclick="toggleForm('login')">Login</a></p>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginForm" class="form">
+        <h2>Login</h2>
+        <input type="email" id="loginEmail" placeholder="Email" required />
+        <input type="password" id="loginPassword" placeholder="Password" required />
+        <button onclick="login()">Sign In</button>
+        <p>Don't have an account? <a href="#" onclick="toggleForm('register')">Register</a></p>
+      </div>
+    </div>
+
+    <div id="welcome" class="hidden">
+      <h2 id="welcomeMessage"></h2>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <div id="forum" class="hidden">
+        <h2>Forum Posts</h2>
+
+        <div id="createPost" class="hidden">
+            <input type="text" id="postTitle" placeholder="Post title" />
+            <textarea id="postContent" placeholder="Write something..."></textarea>
+            <button onclick="createPost()">Publish</button>
+        </div>
+
+        <div id="postsList"></div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
