@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4000/api/auth";
+const API_URL = "https://project4-forum-backend.onrender.com/api/auth";
 
 function toggleForm(type) {
   document.getElementById("registerForm").classList.toggle("active", type === "register");

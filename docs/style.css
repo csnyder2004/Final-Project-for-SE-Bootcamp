@@ -1,78 +1,440 @@
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1e90ff, #00bcd4);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
+/* =========================
+   Global Design System
+   ========================= */
+:root {
+  /* palette */
+  --bg: #0b1020;                 /* page background */
+  --card: #121831;               /* surfaces/cards */
+  --card-2: #0f152b;             /* secondary surfaces */
+  --ink: #e9edf7;                /* primary text */
+  --muted: #9aa3b2;              /* secondary text */
+  --brand: #6ea8ff;              /* primary brand blue */
+  --brand-2: #3b82f6;            /* deeper brand */
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --outline: 0 0 0 3px rgba(110, 168, 255, 0.45);
+
+  /* radius & shadows */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --shadow-1: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 16px 48px rgba(0, 0, 0, 0.35);
+
+  /* sizing */
+  --container: 980px;
+  --gap-sm: 8px;
+  --gap: 12px;
+  --gap-lg: 24px;
+
+  /* timing */
+  --t: 180ms;
 }
 
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-image: url("./assets/b1.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+  color: #fff;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: -1;
+}
+
+
+
+/* Utilities */
 .container {
-  background: white;
-  padding: 2rem;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.hidden { display: none !important; }
+.center { text-align: center; }
+.muted { color: var(--muted) !important; }
+
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Focus ring */
+:focus-visible {
+  outline: var(--outline);
+  border-radius: 6px;
+}
+
+/* =========================
+   Header / Navbar
+   ========================= */
+
+/* ===== Enhanced Navbar ===== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+.brand a {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.brand a:hover {
+  color: #93c5fd; /* good blue */
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: #ddd;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.nav-links a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.nav-links a.active {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 0 10px #3b82f6aa;
+  transform: translateY(-1px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 720px) {
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}
+
+/* =========================
+   Main Layout
+   ========================= */
+.content {
+  padding: 24px 0 40px;
+  display: grid;
+  gap: 20px;
+}
+
+/* Cards / Surfaces */
+.card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+}
+
+/* =========================
+   Buttons
+   ========================= */
+button {
+  font: inherit;
+  border: none;
+  cursor: pointer;
+  padding: 10px 14px;
   border-radius: 10px;
-  width: 350px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  color: #0b1020;
+  background: var(--brand);
+  font-weight: 600;
+  transition: transform var(--t), filter var(--t), background var(--t);
+}
+button:hover { filter: brightness(1.02); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+button.ghost {
+  background: rgba(255,255,255,0.08);
+  color: var(--ink);
+}
+button.ghost:hover { background: rgba(255,255,255,0.12); }
+
+button.danger {
+  background: color-mix(in srgb, var(--danger) 80%, white 10%);
+  color: #fff;
+}
+button.danger:hover { filter: brightness(1.05); }
+
+button.muted {
+  background: rgba(255,255,255,0.14);
+  color: var(--ink);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.1);
+  color: var(--ink);
+}
+
+/* =========================
+   Forms / Inputs
+   ========================= */
+input, textarea, select {
+  width: 100%;
+  color: var(--ink);
+  background: var(--card-2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: border-color var(--t), box-shadow var(--t), background var(--t);
+}
+textarea { resize: vertical; }
+
+input::placeholder, textarea::placeholder { color: #8090aa; }
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--brand) 60%, white 10%);
+  box-shadow: var(--outline);
+}
+
+/* Row & grid helpers */
+.row { display: flex; gap: 12px; align-items: center; }
+.grid { display: grid; gap: 12px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+/* =========================
+   Main Menu
+   ========================= */
+.menu-hero {
+  text-align: center;
+  padding: 48px 20px;
+}
+.menu-hero h1 {
+  font-size: clamp(1.6rem, 2.4vw + 1rem, 2.2rem);
+  margin-bottom: 8px;
+}
+.menu-hero p { color: var(--muted); }
+.menu-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* =========================
+   Todos Page
+   ========================= */
+h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.todo-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.todo-input {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+@media (max-width: 520px) {
+  .todo-input { grid-template-columns: 1fr; }
+}
+
+/* Filter bar */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.filters button {
+  background: rgba(255,255,255,0.12);
+  color: var(--ink);
+}
+.filters .active {
+  background: var(--brand);
+  color: #0b1020;
+}
+
+/* List */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--t), box-shadow var(--t), background var(--t);
+}
+.item:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+
+.left { display: flex; align-items: center; gap: 10px; }
+.right { display: flex; align-items: center; gap: 8px; }
+
+.item input[type="checkbox"] {
+  appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: var(--card-2);
+  display: grid;
+  place-items: center;
+  transition: background var(--t), border-color var(--t);
+}
+.item input[type="checkbox"]::after {
+  content: "";
+  width: 10px; height: 10px;
+  transform: scale(0);
+  transition: transform var(--t);
+  background: var(--brand);
+  border-radius: 2px;
+}
+.item input[type="checkbox"]:checked { border-color: var(--brand-2); background: rgba(110,168,255,0.1); }
+.item input[type="checkbox"]:checked::after { transform: scale(1); }
+
+.item label { cursor: pointer; }
+.item label.done { color: var(--muted); text-decoration: line-through; }
+
+/* Edit input inside item */
+.edit-input {
+  min-width: 220px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--card-2);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+/* Toolbar row (filters + clear button) */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.counter {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* =========================
+   Contact Page
+   ========================= */
+.contact-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.contact-card {
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: var(--shadow-1);
+}
+.contact-card h2 { margin-bottom: 6px; }
+.contact-card p.desc { color: var(--muted); margin-bottom: 16px; }
+
+/* Success banner */
+.success {
+  margin-top: 16px;
+  background: color-mix(in srgb, var(--success) 20%, transparent 80%);
+  color: #d9ffea;
+  border: 1px solid color-mix(in srgb, var(--success) 45%, transparent 55%);
+  padding: 12px 14px;
+  border-radius: 10px;
   text-align: center;
 }
 
-input {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+/* =========================
+   Footer (optional)
+   ========================= */
+.footer {
+  margin-top: 24px;
+  padding: 18px 0 36px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.95rem;
+  border-top: 1px dashed rgba(255,255,255,0.08);
+}
+/* =========================
+   Page Fade-in Animation
+   ========================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-button {
-  background-color: #1e90ff;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  width: 100%;
+
+body::before {
+  animation: fadeIn 1.2s ease-out forwards;
 }
 
-button:hover {
-  background-color: #187bcd;
-}
 
-.hidden {
-  display: none;
-}
-
-.form {
-  display: none;
-}
-
-.form.active {
-  display: block;
-}
-#forum {
-  margin-top: 20px;
-  text-align: left;
-}
-
-#postsList {
-  margin-top: 20px;
-}
-
-.post {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 10px;
-  background-color: #f9f9f9;
-}
-
-textarea {
-  width: 100%;
-  height: 80px;
-  resize: none;
-  margin: 10px 0;
+.container, main, .contact-card, .todo-wrap, .menu-hero {
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out forwards;
+  animation-delay: 0s;
 }
