@@ -3,52 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Forum Login</title>
+  <title>Project 4 Forum</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div class="container">
-    <h1>Project 4 Forum</h1>
 
-    <div id="auth-forms">
+<body>
+  <!-- ===== HEADER BAR ===== -->
+  <header class="site-header">
+    <h1>💬 Project 4 Forum</h1>
+    <p class="subtitle">A modern discussion platform built with Node.js, Express & MongoDB</p>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="container">
+
+    <!-- ===== AUTH SECTION ===== -->
+    <section id="auth-forms" class="card">
       <!-- Register Form -->
       <div id="registerForm" class="form active">
-        <h2>Register</h2>
+        <h2>Create Your Account</h2>
         <input type="text" id="registerUsername" placeholder="Username" required />
         <input type="email" id="registerEmail" placeholder="Email" required />
         <input type="password" id="registerPassword" placeholder="Password" required />
         <button onclick="register()">Sign Up</button>
-        <p>Already have an account? <a href="#" onclick="toggleForm('login')">Login</a></p>
+        <p>Already have an account? 
+          <a href="#" onclick="toggleForm('login')">Login here</a>
+        </p>
       </div>
 
       <!-- Login Form -->
       <div id="loginForm" class="form">
-        <h2>Login</h2>
+        <h2>Welcome Back</h2>
         <input type="email" id="loginEmail" placeholder="Email" required />
         <input type="password" id="loginPassword" placeholder="Password" required />
         <button onclick="login()">Sign In</button>
-        <p>Don't have an account? <a href="#" onclick="toggleForm('register')">Register</a></p>
+        <p>Don't have an account? 
+          <a href="#" onclick="toggleForm('register')">Register here</a>
+        </p>
       </div>
-    </div>
+    </section>
 
-    <div id="welcome" class="hidden">
+    <!-- ===== WELCOME SECTION ===== -->
+    <section id="welcome" class="hidden card">
       <h2 id="welcomeMessage"></h2>
       <button onclick="logout()">Logout</button>
-    </div>
+    </section>
 
-    <div id="forum" class="hidden">
-        <h2>Forum Posts</h2>
+    <!-- ===== FORUM SECTION ===== -->
+    <section id="forum" class="hidden">
+      <h2>Forum Dashboard</h2>
 
-        <div id="createPost" class="hidden">
-            <input type="text" id="postTitle" placeholder="Post title" />
-            <textarea id="postContent" placeholder="Write something..."></textarea>
-            <button onclick="createPost()">Publish</button>
+      <!-- CATEGORY FILTER -->
+      <div id="categorySection" class="card">
+        <h3>Categories</h3>
+        <div id="categoriesList">
+          <button class="category-btn active" onclick="filterByCategory('All')">All</button>
         </div>
+      </div>
 
-        <div id="postsList"></div>
+      <!-- CREATE POST AREA -->
+      <div id="createPost" class="hidden card">
+        <h3>Create a New Post</h3>
+        <input type="text" id="postTitle" placeholder="Post title" required />
+        <textarea id="postContent" placeholder="Write something interesting..." required></textarea>
+
+        <!-- Select category -->
+        <select id="postCategory">
+          <option value="General">General</option>
+          <option value="Tech">Tech</option>
+          <option value="Gaming">Gaming</option>
+          <option value="Education">Education</option>
+          <option value="Misc">Misc</option>
+        </select>
+
+        <button onclick="createPost()">Publish</button>
+      </div>
+
+      <!-- POSTS LIST -->
+      <div id="postsList" class="posts">
+        <p class="muted">No posts yet — be the first to start a discussion!</p>
+      </div>
+    </section>
+
+    <!-- ===== LOADING INDICATOR ===== -->
+    <div id="loading" class="hidden loading">
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
+  </main>
 
-  </div>
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <p>Created by Coleman Snyder | Project 4 — SE Bootcamp</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>

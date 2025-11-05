@@ -1,7 +1,7 @@
 // 🌐 API Base URL (Render Backend)
 const API_URL = "https://project4-forum-backend.onrender.com/api";
 
-// ========== AUTH TOGGLE ==========
+// ========== FORM TOGGLING ==========
 function toggleForm(type) {
   document.getElementById("registerForm").classList.toggle("active", type === "register");
   document.getElementById("loginForm").classList.toggle("active", type === "login");
@@ -20,12 +20,11 @@ async function register() {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password })
+      body: JSON.stringify({ username, email, password }),
     });
 
     const data = await res.json();
     showAlert(data.message, res.ok ? "success" : "error");
-
     if (res.ok) toggleForm("login");
   } catch {
     showAlert("Network error: unable to register.", "error");
@@ -44,7 +43,7 @@ async function login() {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
@@ -58,7 +57,7 @@ async function login() {
   }
 }
 
-// ========== SHOW / HIDE SECTIONS ==========
+// ========== SECTION VISIBILITY ==========
 function showWelcome() {
   document.getElementById("auth-forms").classList.add("hidden");
   document.getElementById("welcome").classList.remove("hidden");
@@ -79,40 +78,60 @@ function logout() {
   toggleForm("login");
 }
 
-// Auto-login on page load
+// Auto-login
 window.onload = () => {
   if (localStorage.getItem("token")) showWelcome();
   else toggleForm("register");
 };
 
 // ========== POSTS ==========
-async function loadPosts() {
+async function loadPosts(category = "All") {
+  const loading = document.getElementById("loading");
+  const postsList = document.getElementById("postsList");
+
+  loading.classList.remove("hidden");
+  postsList.innerHTML = "";
+
   try {
     const res = await fetch(`${API_URL}/posts`);
     const posts = await res.json();
 
-    const postsList = document.getElementById("postsList");
-    postsList.innerHTML = "";
+    loading.classList.add("hidden");
 
-    posts.forEach(p => {
+    if (!posts.length) {
+      postsList.innerHTML = `<p class="muted">No posts yet — be the first to start a discussion!</p>`;
+      return;
+    }
+
+    const filteredPosts =
+      category === "All" ? posts : posts.filter((p) => p.category === category);
+
+    postsList.innerHTML = "";
+    filteredPosts.forEach((p) => {
       const div = document.createElement("div");
       div.className = "post";
       div.innerHTML = `
         <h3>${p.title}</h3>
         <p>${p.content}</p>
-        <small>By ${p.author?.username || "Unknown"} on ${new Date(p.createdAt).toLocaleString()}</small>
+        <small>
+          <strong>${p.category || "General"}</strong> |
+          By ${p.author?.username || "Unknown"} on ${new Date(p.createdAt).toLocaleString()}
+        </small>
       `;
       postsList.appendChild(div);
     });
   } catch {
+    loading.classList.add("hidden");
     showAlert("Failed to load posts. Please try again later.", "error");
   }
 }
 
+// ========== CREATE POST ==========
 async function createPost() {
   const token = localStorage.getItem("token");
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
+  const category = document.getElementById("postCategory").value;
 
   if (!title || !content)
     return showAlert("Title and content are required.", "error");
@@ -122,9 +141,9 @@ async function createPost() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ title, content })
+      body: JSON.stringify({ title, content, category }),
     });
 
     const data = await res.json();
@@ -140,29 +159,28 @@ async function createPost() {
   }
 }
 
+// ========== CATEGORY FILTER ==========
+function filterByCategory(category) {
+  document
+    .querySelectorAll(".category-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  event.target.classList.add("active");
+  loadPosts(category);
+}
+
 // ========== ALERT BOX ==========
 function showAlert(message, type = "success") {
-  // Create alert if not exists
   let alertBox = document.getElementById("alertBox");
   if (!alertBox) {
     alertBox = document.createElement("div");
     alertBox.id = "alertBox";
-    alertBox.style.position = "fixed";
-    alertBox.style.top = "20px";
-    alertBox.style.right = "20px";
-    alertBox.style.padding = "12px 16px";
-    alertBox.style.borderRadius = "8px";
-    alertBox.style.fontWeight = "500";
-    alertBox.style.zIndex = "9999";
-    alertBox.style.transition = "opacity 0.3s ease";
+    alertBox.className = "alert-box";
     document.body.appendChild(alertBox);
   }
 
   alertBox.textContent = message;
-  alertBox.style.background = type === "error" ? "#ef4444" : "#22c55e";
-  alertBox.style.color = "#fff";
-  alertBox.style.opacity = "1";
+  alertBox.classList.remove("error", "success", "show");
+  alertBox.classList.add(type, "show");
 
-  // Hide after 3 seconds
-  setTimeout(() => { alertBox.style.opacity = "0"; }, 3000);
+  setTimeout(() => alertBox.classList.remove("show"), 3000);
 }
