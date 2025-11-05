@@ -109,12 +109,34 @@ async function loadPosts(category = "All") {
   postsList.innerHTML = "";
 
   try {
-    const res = await fetch(`${API_URL}/posts`);
-    const posts = await res.json();
+    const res = await fetch(`${API_URL}/posts`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    console.log("🛰️ Fetching posts:", res.status, res.statusText);
+    const text = await res.text(); // get raw text first
+    console.log("📦 Raw response:", text);
+
+    // Try parsing as JSON safely
+    let posts;
+    try {
+      posts = JSON.parse(text);
+    } catch {
+      console.error("💥 Could not parse posts JSON!");
+      showAlert("Server returned invalid data.", "error");
+      return;
+    }
 
     loading.classList.add("hidden");
 
-    if (!Array.isArray(posts) || !posts.length) {
+    if (!res.ok) {
+      console.error("❌ Failed to load posts:", posts);
+      showAlert(posts.message || "Failed to load posts.", "error");
+      return;
+    }
+
+    if (!Array.isArray(posts) || posts.length === 0) {
       postsList.innerHTML = `<p class="muted">No posts yet — be the first to start a discussion!</p>`;
       return;
     }
@@ -138,9 +160,11 @@ async function loadPosts(category = "All") {
     });
   } catch (error) {
     loading.classList.add("hidden");
-    showAlert("Failed to load posts. Please try again later.", "error");
+    console.error("💥 loadPosts() failed:", error);
+    showAlert("Failed to load posts. Check console.", "error");
   }
 }
+
 
 // ========== CREATE POST ==========
 async function createPost() {
