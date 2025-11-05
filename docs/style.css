@@ -24,7 +24,7 @@
 body {
   background: 
     linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.9)),
-    url("/docs/assets/bg.jpg") center center / cover no-repeat;
+    url("/assets/bg.png") center center / cover no-repeat;
   color: var(--text-light);
   display: flex;
   flex-direction: column;
