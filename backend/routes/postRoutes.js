@@ -2,7 +2,8 @@
 import express from "express";
 import { createPost, listPosts } from "../controllers/postController.js";
 import Post from "../models/Post.js"; // for categories route
-import { authMiddleware } from "../middleware/auth.js"; // adjust if your auth file is named differently
+import { authMiddleware } from "../middleware/authMiddleware.js";
+
 
 const router = express.Router();
 
