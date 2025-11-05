@@ -6,7 +6,7 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import seedRoutes from "./routes/seedRoutes.js";
-app.use("/api/seed", seedRoutes);
+
 
 
 // ===== Load environment variables =====
@@ -58,6 +58,7 @@ app.get("/api", (_req, res) => {
 // ===== Application Routes =====
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/seed", seedRoutes);
 
 // ===== 404 Handler =====
 app.use((req, res) => {
