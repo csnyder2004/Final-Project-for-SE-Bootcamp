@@ -9,12 +9,15 @@ const router = express.Router();
 
 router.post("/demo", async (req, res) => {
   try {
-    if (process.env.NODE_ENV !== "development") {
-      return res
-        .status(403)
-        .json({ message: "Demo seeding disabled in production." });
+    // 🧩 Security: allow seeding only with key in production
+    if (process.env.NODE_ENV === "production") {
+      const key = req.query.key;
+      if (key !== process.env.SEED_KEY) {
+        return res.status(403).json({ message: "❌ Unauthorized seeding attempt." });
+      }
     }
 
+    // 💡 In development, skip the key check
     await connectDB();
 
     console.log("⚠️ Clearing old data...");
