@@ -1,28 +1,47 @@
-// backend/models/Post.js
 import mongoose from "mongoose";
 
-const PostSchema = new mongoose.Schema(
+const postSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, trim: true },
-    content: { type: String, required: true, trim: true },
+    // 🏷️ Post Title
+    title: {
+      type: String,
+      required: [true, "Post title is required"],
+      trim: true,
+      maxlength: 150,
+    },
 
-    // 👇 NEW: Category field
+    // 📝 Post Content
+    content: {
+      type: String,
+      required: [true, "Post content is required"],
+      trim: true,
+      maxlength: 5000,
+    },
+
+    // 🗂️ Category (for filtering/grouping)
     category: {
       type: String,
       required: true,
-      default: "General",   // ensures old posts still work
+      default: "General",
       trim: true,
       index: true,
+      enum: ["General", "Tech", "Gaming", "Education", "Misc"],
     },
 
-    // Assuming you already set author like this; keep your existing structure
+    // 👤 Linked Author
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true, // Automatically adds createdAt & updatedAt
+    versionKey: false, // Removes "__v" field for cleaner responses
+  }
 );
 
-export default mongoose.model("Post", PostSchema);
+// 🔍 Optional: text index for search functionality
+postSchema.index({ title: "text", content: "text", category: 1 });
+
+export default mongoose.model("Post", postSchema);
