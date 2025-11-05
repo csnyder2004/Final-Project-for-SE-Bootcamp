@@ -3,8 +3,20 @@ const API_URL = "https://project4-forum-backend.onrender.com/api";
 
 // ========== FORM TOGGLING ==========
 function toggleForm(type) {
-  document.getElementById("registerForm").classList.toggle("active", type === "register");
-  document.getElementById("loginForm").classList.toggle("active", type === "login");
+  const registerForm = document.getElementById("registerForm");
+  const loginForm = document.getElementById("loginForm");
+
+  registerForm.classList.toggle("active", type === "register");
+  loginForm.classList.toggle("active", type === "login");
+
+  // Auto-focus the first field for convenience
+  const focusField =
+    type === "register"
+      ? document.getElementById("registerUsername")
+      : document.getElementById("loginEmail");
+  if (focusField) focusField.focus();
+
+  updateBackButton("auth");
 }
 
 // ========== REGISTER ==========
@@ -25,6 +37,7 @@ async function register() {
 
     const data = await res.json();
     showAlert(data.message, res.ok ? "success" : "error");
+
     if (res.ok) toggleForm("login");
   } catch {
     showAlert("Network error: unable to register.", "error");
@@ -47,7 +60,7 @@ async function login() {
     });
 
     const data = await res.json();
-    if (!res.ok) return showAlert(data.message, "error");
+    if (!res.ok) return showAlert(data.message || "Invalid credentials.", "error");
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("username", data.user.username);
@@ -67,6 +80,7 @@ function showWelcome() {
   const username = localStorage.getItem("username");
   document.getElementById("welcomeMessage").innerText = `Welcome, ${username}!`;
 
+  updateBackButton("forum");
   loadPosts();
 }
 
@@ -76,15 +90,17 @@ function logout() {
   document.getElementById("welcome").classList.add("hidden");
   document.getElementById("forum").classList.add("hidden");
   toggleForm("login");
+  updateBackButton("auth");
+  showAlert("You’ve been signed out.", "success");
 }
 
-// Auto-login
+// ========== AUTO-LOGIN ON PAGE LOAD ==========
 window.onload = () => {
   if (localStorage.getItem("token")) showWelcome();
   else toggleForm("register");
 };
 
-// ========== POSTS ==========
+// ========== LOAD POSTS ==========
 async function loadPosts(category = "All") {
   const loading = document.getElementById("loading");
   const postsList = document.getElementById("postsList");
@@ -98,7 +114,7 @@ async function loadPosts(category = "All") {
 
     loading.classList.add("hidden");
 
-    if (!posts.length) {
+    if (!Array.isArray(posts) || !posts.length) {
       postsList.innerHTML = `<p class="muted">No posts yet — be the first to start a discussion!</p>`;
       return;
     }
@@ -120,7 +136,7 @@ async function loadPosts(category = "All") {
       `;
       postsList.appendChild(div);
     });
-  } catch {
+  } catch (error) {
     loading.classList.add("hidden");
     showAlert("Failed to load posts. Please try again later.", "error");
   }
@@ -164,8 +180,32 @@ function filterByCategory(category) {
   document
     .querySelectorAll(".category-btn")
     .forEach((btn) => btn.classList.remove("active"));
-  event.target.classList.add("active");
+
+  const clicked = document.querySelector(
+    `.category-btn:nth-child(${["All", "General", "Tech", "Gaming", "Education", "Misc"].indexOf(category) + 1})`
+  );
+  if (clicked) clicked.classList.add("active");
+
   loadPosts(category);
+}
+
+// ========== BACK BUTTON ==========
+function goBack() {
+  const token = localStorage.getItem("token");
+  if (token) {
+    logout();
+  } else {
+    const loginActive = document
+      .getElementById("loginForm")
+      .classList.contains("active");
+    toggleForm(loginActive ? "register" : "login");
+  }
+}
+
+function updateBackButton(state) {
+  const backBtn = document.getElementById("backButton");
+  if (state === "forum" || state === "auth") backBtn.classList.remove("hidden");
+  else backBtn.classList.add("hidden");
 }
 
 // ========== ALERT BOX ==========

@@ -10,8 +10,11 @@
 <body>
   <!-- ===== HEADER BAR ===== -->
   <header class="site-header">
-    <h1>💬 Project 4 Forum</h1>
-    <p class="subtitle">A modern discussion platform built with Node.js, Express & MongoDB</p>
+    <div class="header-left">
+      <h1>💬 Project 4 Forum</h1>
+      <p class="subtitle">A modern discussion platform built with Node.js, Express & MongoDB</p>
+    </div>
+    <button id="backButton" class="back-btn hidden" onclick="goBack()">← Back</button>
   </header>
 
   <!-- ===== MAIN CONTENT ===== -->
@@ -56,8 +59,13 @@
       <!-- CATEGORY FILTER -->
       <div id="categorySection" class="card">
         <h3>Categories</h3>
-        <div id="categoriesList">
+        <div id="categoriesList" class="categories">
           <button class="category-btn active" onclick="filterByCategory('All')">All</button>
+          <button class="category-btn" onclick="filterByCategory('General')">General</button>
+          <button class="category-btn" onclick="filterByCategory('Tech')">Tech</button>
+          <button class="category-btn" onclick="filterByCategory('Gaming')">Gaming</button>
+          <button class="category-btn" onclick="filterByCategory('Education')">Education</button>
+          <button class="category-btn" onclick="filterByCategory('Misc')">Misc</button>
         </div>
       </div>
 
@@ -86,15 +94,19 @@
     </section>
 
     <!-- ===== LOADING INDICATOR ===== -->
-    <div id="loading" class="hidden loading">
+    <div id="loading" class="loading hidden">
       <div class="spinner"></div>
-      <p>Loading...</p>
+      <p>Loading posts...</p>
     </div>
   </main>
 
   <!-- ===== FOOTER ===== -->
   <footer class="site-footer">
-    <p>Created by Coleman Snyder | Project 4 — SE Bootcamp</p>
+    <p>Created by <strong>Coleman Snyder</strong> | Project 4 — SE Bootcamp</p>
+    <p class="footer-links">
+      <a href="https://github.com/csnyder2004" target="_blank">GitHub</a> ·
+      <a href="mailto:csnyder@sebootcamp.com">Contact</a>
+    </p>
   </footer>
 
   <script src="app.js"></script>
