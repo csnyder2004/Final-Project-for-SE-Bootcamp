@@ -10,33 +10,29 @@ export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // --- 1️⃣ Validate fields ---
-    if (!username || !email || !password) {
+    // --- 1️⃣ Validate inputs ---
+    if (!username || !email || !password)
       return res.status(400).json({ message: "Please fill out all fields." });
-    }
 
-    if (username.length < 3) {
+    if (username.length < 3)
       return res.status(400).json({ message: "Username must be at least 3 characters long." });
-    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email))
       return res.status(400).json({ message: "Please enter a valid email address." });
-    }
 
-    if (password.length < 6) {
+    if (password.length < 6)
       return res.status(400).json({ message: "Password must be at least 6 characters long." });
-    }
 
-    // --- 2️⃣ Check if email already exists ---
+    // --- 2️⃣ Check duplicates ---
     const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existingUser) {
+    if (existingUser)
       return res.status(400).json({ message: "That email address is already registered." });
-    }
 
-    // --- 3️⃣ Create and hash password ---
+    // --- 3️⃣ Hash password ---
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // --- 4️⃣ Create user ---
     const newUser = await User.create({
       username: username.trim(),
       email: email.toLowerCase().trim(),
@@ -55,7 +51,7 @@ export const registerUser = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Registration error:", err);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error during registration. Please try again later.",
     });
   }
@@ -70,23 +66,20 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     // --- 1️⃣ Validate input ---
-    if (!email || !password) {
+    if (!email || !password)
       return res.status(400).json({ message: "Please enter both email and password." });
-    }
 
-    // --- 2️⃣ Check if account exists ---
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user) {
+    // --- 2️⃣ Look up user and include password field ---
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+password");
+    if (!user)
       return res.status(400).json({ message: "No account found with that email address." });
-    }
 
-    // --- 3️⃣ Validate password ---
+    // --- 3️⃣ Compare password hashes ---
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    if (!isMatch)
       return res.status(400).json({ message: "Incorrect password. Please try again." });
-    }
 
-    // --- 4️⃣ Create token ---
+    // --- 4️⃣ Create JWT ---
     const token = jwt.sign(
       { id: user._id, username: user.username },
       process.env.JWT_SECRET,
@@ -95,7 +88,7 @@ export const loginUser = async (req, res) => {
 
     console.log(`✅ ${user.username} logged in successfully`);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "✅ Login successful!",
       token,
       user: {
@@ -106,7 +99,7 @@ export const loginUser = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Login error:", err);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error during login. Please try again later.",
     });
   }
@@ -123,6 +116,6 @@ export const verifyUser = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Verify token error:", err);
-    res.status(500).json({ message: "Failed to verify token." });
+    return res.status(500).json({ message: "Failed to verify token." });
   }
 };
