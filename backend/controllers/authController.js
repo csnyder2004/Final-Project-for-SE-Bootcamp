@@ -10,37 +10,43 @@ export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // --- 1️⃣ Basic Validation ---
+    // --- 1️⃣ Validate fields ---
     if (!username || !email || !password) {
-      return res.status(400).json({ message: "All fields are required." });
+      return res.status(400).json({ message: "Please fill out all fields." });
     }
 
-    // --- 2️⃣ Check for duplicates ---
-    const existingUser = await User.findOne({ email });
+    if (username.length < 3) {
+      return res.status(400).json({ message: "Username must be at least 3 characters long." });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email address." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long." });
+    }
+
+    // --- 2️⃣ Check if email already exists ---
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already registered." });
+      return res.status(400).json({ message: "That email address is already registered." });
     }
 
-    // --- 3️⃣ Hash password safely ---
+    // --- 3️⃣ Create and hash password ---
     const hashedPassword = await bcrypt.hash(password, 10);
-    if (!hashedPassword) {
-      console.error("⚠️ bcrypt.hash() returned undefined");
-      return res.status(500).json({ message: "Password hashing failed." });
-    }
 
-    // --- 4️⃣ Create user in MongoDB ---
-    const newUser = new User({
+    const newUser = await User.create({
       username: username.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
     });
 
-    await newUser.save();
-
-    console.log(`✅ Registered new user: ${newUser.username} (${newUser.email})`);
+    console.log(`✅ Registered new user: ${newUser.username}`);
 
     return res.status(201).json({
-      message: "User registered successfully!",
+      message: "🎉 Registration successful! You can now log in.",
       user: {
         id: newUser._id,
         username: newUser.username,
@@ -49,13 +55,15 @@ export const registerUser = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Registration error:", err);
-    res.status(500).json({ message: "Server error during registration." });
+    res.status(500).json({
+      message: "Server error during registration. Please try again later.",
+    });
   }
 };
 
 /**
  * 🔐 LOGIN USER
- * Verifies credentials, compares bcrypt hash, and returns JWT token.
+ * Checks credentials and returns JWT.
  */
 export const loginUser = async (req, res) => {
   try {
@@ -63,30 +71,22 @@ export const loginUser = async (req, res) => {
 
     // --- 1️⃣ Validate input ---
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required." });
+      return res.status(400).json({ message: "Please enter both email and password." });
     }
 
-    // --- 2️⃣ Find existing user ---
+    // --- 2️⃣ Check if account exists ---
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password." });
+      return res.status(400).json({ message: "No account found with that email address." });
     }
 
-    // --- 3️⃣ Guard against missing password field ---
-    if (!user.password) {
-      console.error("⚠️ User record missing password field:", user);
-      return res
-        .status(500)
-        .json({ message: "Server configuration error. Please re-register." });
-    }
-
-    // --- 4️⃣ Compare password hashes ---
+    // --- 3️⃣ Validate password ---
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password." });
+      return res.status(400).json({ message: "Incorrect password. Please try again." });
     }
 
-    // --- 5️⃣ Create JWT ---
+    // --- 4️⃣ Create token ---
     const token = jwt.sign(
       { id: user._id, username: user.username },
       process.env.JWT_SECRET,
@@ -95,8 +95,8 @@ export const loginUser = async (req, res) => {
 
     console.log(`✅ ${user.username} logged in successfully`);
 
-    return res.status(200).json({
-      message: "Login successful!",
+    res.status(200).json({
+      message: "✅ Login successful!",
       token,
       user: {
         id: user._id,
@@ -106,19 +106,19 @@ export const loginUser = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Login error:", err);
-    res.status(500).json({ message: "Server error during login." });
+    res.status(500).json({
+      message: "Server error during login. Please try again later.",
+    });
   }
 };
 
 /**
  * 🧾 VERIFY TOKEN / GET USER INFO
- * Used by /api/auth/me
  */
 export const verifyUser = async (req, res) => {
   try {
-    // req.user is attached in authMiddleware.js
     res.status(200).json({
-      message: "🔒 Token verified successfully!",
+      message: "🔒 Token verified successfully.",
       user: req.user,
     });
   } catch (err) {
