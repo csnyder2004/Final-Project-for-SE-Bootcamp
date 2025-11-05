@@ -371,3 +371,18 @@ button:active {
 .site-footer a:hover {
   text-decoration: underline;
 }
+
+/* 🧩 Fix: Hide and Show Correct Sections When Authenticated */
+.hidden {
+  display: none !important;
+}
+
+/* 👤 When user is authenticated (body.authed added via JS) */
+body.authed #auth-forms {
+  display: none !important;
+}
+body.authed #welcome,
+body.authed #forum,
+body.authed #createPost {
+  display: block !important;
+}

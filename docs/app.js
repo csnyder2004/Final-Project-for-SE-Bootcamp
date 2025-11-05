@@ -72,6 +72,8 @@ async function login() {
 
 // ========== SECTION VISIBILITY ==========
 function showWelcome() {
+  console.log("✅ showWelcome() running");
+  document.body.classList.add("authed"); // 👈 NEW LINE
   document.getElementById("auth-forms").classList.add("hidden");
   document.getElementById("welcome").classList.remove("hidden");
   document.getElementById("forum").classList.remove("hidden");
@@ -86,6 +88,7 @@ function showWelcome() {
 
 function logout() {
   localStorage.clear();
+  document.body.classList.remove("authed"); // 👈 NEW LINE
   document.getElementById("auth-forms").classList.remove("hidden");
   document.getElementById("welcome").classList.add("hidden");
   document.getElementById("forum").classList.add("hidden");
@@ -115,10 +118,9 @@ async function loadPosts(category = "All") {
     });
 
     console.log("🛰️ Fetching posts:", res.status, res.statusText);
-    const text = await res.text(); // get raw text first
+    const text = await res.text();
     console.log("📦 Raw response:", text);
 
-    // Try parsing as JSON safely
     let posts;
     try {
       posts = JSON.parse(text);
@@ -164,7 +166,6 @@ async function loadPosts(category = "All") {
     showAlert("Failed to load posts. Check console.", "error");
   }
 }
-
 
 // ========== CREATE POST ==========
 async function createPost() {

@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project 4 Forum</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- 🔒 Minimal UI safety net: when authenticated, always hide auth and show forum -->
+  <style>
+    /* If JS adds .authed to <body>, enforce the correct sections visible/hidden */
+    body.authed #auth-forms { display: none !important; }
+    body.authed #welcome,
+    body.authed #forum,
+    body.authed #createPost { display: block !important; }
+    /* Keep your hidden helper intact; this just guarantees visibility when authed */
+    .hidden { display: none !important; }
+  </style>
 </head>
 
 <body>
@@ -109,6 +120,52 @@
     </p>
   </footer>
 
+  <!-- 🔌 Bootstrap the authed UI BEFORE app.js runs (prevents a flash of the auth forms) -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("token")) {
+          document.body.classList.add("authed");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <script src="app.js"></script>
+
+  <!-- 🛡️ Non-destructive wrappers: extend showWelcome/logout to also toggle body.authed -->
+  <script>
+    (function () {
+      // Wrap existing functions ONLY if they exist, don't break anything
+      const wrap = (name, before) => {
+        if (typeof window[name] === "function") {
+          const original = window[name];
+          window[name] = function () {
+            try { before && before(); } catch (e) {}
+            return original.apply(this, arguments);
+          };
+        }
+      };
+
+      // When app says "we're logged in", also add the authed class
+      wrap("showWelcome", () => {
+        document.body.classList.add("authed");
+      });
+
+      // When app logs out, remove the authed class
+      wrap("logout", () => {
+        document.body.classList.remove("authed");
+      });
+
+      // Also update Back button visibility based on current state
+      const backBtn = document.getElementById("backButton");
+      const refreshBackBtn = () => {
+        const token = localStorage.getItem("token");
+        if (token) backBtn.classList.remove("hidden");
+        else backBtn.classList.remove("hidden"); // keep visible for auth toggle
+      };
+      refreshBackBtn();
+    })();
+  </script>
 </body>
 </html>
