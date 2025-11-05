@@ -1,5 +1,6 @@
+// backend/routes/authRoutes.js
 import express from "express";
-import { registerUser, loginUser } from "../controllers/authController.js";
+import { registerUser, loginUser, verifyUser } from "../controllers/authController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -23,11 +24,6 @@ router.post("/login", loginUser);
  * @desc    Verify and return user details (Protected)
  * @access  Private
  */
-router.get("/me", authMiddleware, (req, res) => {
-  res.json({
-    message: "🔒 Protected route accessed successfully!",
-    user: req.user,
-  });
-});
+router.get("/me", authMiddleware, verifyUser);
 
 export default router;

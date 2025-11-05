@@ -1,38 +1,43 @@
-// backend/controllers/authController.js
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// REGISTER USER
+/**
+ * 🧩 REGISTER USER
+ * Validates input, hashes password, and creates new user.
+ */
 export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Validate input
+    // --- 1️⃣ Basic Validation ---
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
-    });
+    // --- 2️⃣ Check for duplicates ---
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Username or email already registered." });
+      return res.status(400).json({ message: "Email already registered." });
     }
 
-    // Hash password
+    // --- 3️⃣ Hash password safely ---
     const hashedPassword = await bcrypt.hash(password, 10);
+    if (!hashedPassword) {
+      console.error("⚠️ bcrypt.hash() returned undefined");
+      return res.status(500).json({ message: "Password hashing failed." });
+    }
 
-    // Create new user
+    // --- 4️⃣ Create user in MongoDB ---
     const newUser = new User({
-      username,
-      email,
+      username: username.trim(),
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
     });
+
     await newUser.save();
+
+    console.log(`✅ Registered new user: ${newUser.username} (${newUser.email})`);
 
     return res.status(201).json({
       message: "User registered successfully!",
@@ -48,31 +53,49 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// LOGIN USER
+/**
+ * 🔐 LOGIN USER
+ * Verifies credentials, compares bcrypt hash, and returns JWT token.
+ */
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
+    // --- 1️⃣ Validate input ---
     if (!email || !password) {
-      return res.status(400).json({ message: "All fields are required." });
+      return res.status(400).json({ message: "Email and password required." });
     }
 
-    const user = await User.findOne({ email });
-    if (!user)
+    // --- 2️⃣ Find existing user ---
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
       return res.status(400).json({ message: "Invalid email or password." });
+    }
 
+    // --- 3️⃣ Guard against missing password field ---
+    if (!user.password) {
+      console.error("⚠️ User record missing password field:", user);
+      return res
+        .status(500)
+        .json({ message: "Server configuration error. Please re-register." });
+    }
+
+    // --- 4️⃣ Compare password hashes ---
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+    if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password." });
+    }
 
+    // --- 5️⃣ Create JWT ---
     const token = jwt.sign(
       { id: user._id, username: user.username },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    return res.json({
+    console.log(`✅ ${user.username} logged in successfully`);
+
+    return res.status(200).json({
       message: "Login successful!",
       token,
       user: {
@@ -84,5 +107,22 @@ export const loginUser = async (req, res) => {
   } catch (err) {
     console.error("❌ Login error:", err);
     res.status(500).json({ message: "Server error during login." });
+  }
+};
+
+/**
+ * 🧾 VERIFY TOKEN / GET USER INFO
+ * Used by /api/auth/me
+ */
+export const verifyUser = async (req, res) => {
+  try {
+    // req.user is attached in authMiddleware.js
+    res.status(200).json({
+      message: "🔒 Token verified successfully!",
+      user: req.user,
+    });
+  } catch (err) {
+    console.error("❌ Verify token error:", err);
+    res.status(500).json({ message: "Failed to verify token." });
   }
 };
