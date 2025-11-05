@@ -214,6 +214,30 @@ function filterByCategory(category) {
   loadPosts(category);
 }
 
+// ========== LOAD DEMO DATA ==========
+async function loadDemoData() {
+  if (!confirm("⚠️ This will reset all data. Continue?")) return;
+
+  try {
+    const res = await fetch(`${API_URL}/seed/demo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const data = await res.json();
+    showAlert(data.message, res.ok ? "success" : "error");
+
+    if (res.ok && data.demoAccounts) {
+      console.table(data.demoAccounts);
+      showAlert("Demo users created! Log in as 'coleman@example.com' / password123", "success");
+    }
+  } catch (error) {
+    console.error("💥 loadDemoData() failed:", error);
+    showAlert("Failed to seed demo data.", "error");
+  }
+}
+
+
 // ========== BACK BUTTON ==========
 function goBack() {
   const token = localStorage.getItem("token");

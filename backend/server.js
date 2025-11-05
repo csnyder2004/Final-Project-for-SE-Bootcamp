@@ -5,6 +5,9 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import seedRoutes from "./routes/seedRoutes.js";
+app.use("/api/seed", seedRoutes);
+
 
 // ===== Load environment variables =====
 dotenv.config();
