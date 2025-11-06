@@ -610,9 +610,4 @@ label .field-error {
   text-decoration: underline;
   cursor: pointer;
 }
-#postsPlaceholder {
-  color: #666;
-  text-align: center;
-  padding: 20px;
-  font-style: italic;
-}
+
