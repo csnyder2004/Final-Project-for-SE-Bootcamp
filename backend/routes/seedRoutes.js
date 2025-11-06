@@ -1,3 +1,4 @@
+// backend/routes/seedRoutes.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
@@ -8,36 +9,50 @@ const router = express.Router();
 /**
  * POST /api/seed/demo
  * Seeds Vols Football–themed demo users and posts.
- * Safe for repeated use (will not duplicate if already exists).
+ * Can be safely re-run — automatically clears old demo data first.
  */
 router.post("/demo", async (_req, res) => {
   try {
-    const existingUsers = await User.find({ email: /@volsforum\.com$/ });
-    const existingPosts = await Post.find({});
-
-    // If demo data already exists, return it safely
-    if (existingUsers.length > 0 && existingPosts.length > 0) {
-      return res.json({
-        message: "🏈 Vols demo data already loaded!",
-        demoAccounts: [
-          { email: "smokey@volsforum.com", password: "govols123" },
-          { email: "neyland@volsforum.com", password: "govols123" },
-          { email: "rocky@volsforum.com", password: "govols123" },
-        ],
-      });
-    }
-
     console.log("🌱 Seeding Tennessee Vols Football demo data...");
+
+    // 🧹 Clean up any previous Vols demo data to prevent duplicates
+    await User.deleteMany({ email: /@volsforum\.com$/ });
+    await Post.deleteMany({
+      category: {
+        $in: [
+          "Game Day Talk",
+          "Players & Recruiting",
+          "Stats & Analysis",
+          "Vols History",
+          "SEC Rivalries",
+          "Fan Zone",
+        ],
+      },
+    });
+
+    // 🔐 Hash password for all demo users
     const hashedPass = await bcrypt.hash("govols123", 10);
 
-    // Demo users
+    // 👤 Demo users
     const users = await User.insertMany([
-      { username: "SmokeyTheDog", email: "smokey@volsforum.com", password: hashedPass },
-      { username: "NeylandLegend", email: "neyland@volsforum.com", password: hashedPass },
-      { username: "RockyTopFan", email: "rocky@volsforum.com", password: hashedPass },
+      {
+        username: "SmokeyTheDog",
+        email: "smokey@volsforum.com",
+        password: hashedPass,
+      },
+      {
+        username: "NeylandLegend",
+        email: "neyland@volsforum.com",
+        password: hashedPass,
+      },
+      {
+        username: "RockyTopFan",
+        email: "rocky@volsforum.com",
+        password: hashedPass,
+      },
     ]);
 
-    // Demo posts for each category
+    // 🏈 Demo posts for each Vols category
     await Post.insertMany([
       {
         title: "🔥 Game Day Thread: Vols vs Alabama!",
