@@ -5,9 +5,7 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
-import seedRoutes from "./routes/seedRoutes.js";
-
-
+import seedRoutes from "./routes/seedRoutes.js"; // 👈 added back
 
 // ===== Load environment variables =====
 dotenv.config();
@@ -18,7 +16,7 @@ app.set("trust proxy", 1);
 
 // ===== Configure CORS =====
 const allowlist = [
-  process.env.FRONTEND_URL, // e.g. https://csnyder2004.github.io/Final-Project-for-SE-Bootcamp
+  process.env.FRONTEND_URL,
   "http://localhost:3000",
   "http://localhost:4000",
   "http://127.0.0.1:5500",
@@ -28,7 +26,7 @@ const allowlist = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // allow same-origin
+    if (!origin) return callback(null, true);
     const allowed = allowlist.filter(Boolean).some((o) => origin.startsWith(o));
     if (allowed) callback(null, true);
     else callback(new Error("Not allowed by CORS"));
@@ -58,7 +56,7 @@ app.get("/api", (_req, res) => {
 // ===== Application Routes =====
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
-app.use("/api/seed", seedRoutes);
+app.use("/api/seed", seedRoutes); // 👈 new route for manual demo data
 
 // ===== 404 Handler =====
 app.use((req, res) => {

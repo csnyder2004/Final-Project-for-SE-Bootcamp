@@ -1,79 +1,65 @@
-// backend/routes/seedRoutes.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Post from "../models/Post.js";
-import { connectDB } from "../config/db.js";
 
 const router = express.Router();
 
-router.post("/demo", async (req, res) => {
+/**
+ * POST /api/seed/demo
+ * Creates demo users and posts if not already present.
+ * Safe for repeated use. Public, no password needed.
+ */
+router.post("/demo", async (_req, res) => {
   try {
-    // 🧩 Security: allow seeding only with key in production
-    if (process.env.NODE_ENV === "production") {
-      const key = req.query.key;
-      if (key !== process.env.SEED_KEY) {
-        return res.status(403).json({ message: "❌ Unauthorized seeding attempt." });
-      }
+    const existingUsers = await User.find({ email: /@example\.com$/ });
+    const existingPosts = await Post.find({});
+
+    if (existingUsers.length > 0 && existingPosts.length > 0) {
+      return res.json({
+        message: "Demo data already loaded!",
+        demoAccounts: [
+          { email: "coleman@example.com", password: "password123" },
+          { email: "alex@example.com", password: "password123" },
+          { email: "jordan@example.com", password: "password123" },
+        ],
+      });
     }
 
-    // 💡 In development, skip the key check
-    await connectDB();
-
-    console.log("⚠️ Clearing old data...");
-    await User.deleteMany({});
-    await Post.deleteMany({});
-
-    console.log("🌱 Seeding demo users...");
+    console.log("🌱 Seeding demo data...");
     const hashedPass = await bcrypt.hash("password123", 10);
 
     const users = await User.insertMany([
-      {
-        username: "coleman",
-        email: "coleman@example.com",
-        password: hashedPass,
-      },
-      {
-        username: "alex",
-        email: "alex@example.com",
-        password: hashedPass,
-      },
-      {
-        username: "jordan",
-        email: "jordan@example.com",
-        password: hashedPass,
-      },
+      { username: "coleman", email: "coleman@example.com", password: hashedPass },
+      { username: "alex", email: "alex@example.com", password: hashedPass },
+      { username: "jordan", email: "jordan@example.com", password: hashedPass },
     ]);
 
-    console.log("🧱 Seeding demo posts...");
-    const posts = await Post.insertMany([
+    await Post.insertMany([
       {
         title: "Welcome to Project 4 Forum!",
-        content:
-          "This is a demo post. Try logging in as any user below to explore!",
+        content: "This is demo data! Explore posts and try logging in as demo users.",
         category: "General",
         author: users[0]._id,
       },
       {
         title: "Learning Node.js",
-        content:
-          "Node.js lets you use JavaScript everywhere — frontend and backend!",
+        content: "Node.js lets you use JavaScript everywhere — frontend and backend!",
         category: "Education",
         author: users[1]._id,
       },
       {
         title: "Favorite Tech Stack?",
-        content:
-          "I love MERN! What’s your favorite? Try posting your thoughts!",
+        content: "I love MERN! What’s your favorite?",
         category: "Tech",
         author: users[2]._id,
       },
     ]);
 
-    console.log(`✅ Seeded ${users.length} users and ${posts.length} posts!`);
+    console.log("✅ Demo data seeded successfully!");
 
     res.json({
-      message: "✅ Demo data loaded successfully!",
+      message: "✅ Demo data added successfully!",
       demoAccounts: [
         { email: "coleman@example.com", password: "password123" },
         { email: "alex@example.com", password: "password123" },
