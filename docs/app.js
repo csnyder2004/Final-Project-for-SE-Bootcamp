@@ -72,7 +72,6 @@ async function login() {
 
 // ========== SECTION VISIBILITY ==========
 function showWelcome() {
-  console.log("✅ showWelcome() running");
   document.body.classList.add("authed");
   document.getElementById("auth-forms").classList.add("hidden");
   document.getElementById("welcome").classList.remove("hidden");
@@ -82,14 +81,10 @@ function showWelcome() {
   const username = localStorage.getItem("username");
   document.getElementById("welcomeMessage").innerText = `Welcome, ${username}!`;
 
-  // Restore demo button state
   const demoBtn = document.getElementById("demoBtn");
   const demoLoaded = localStorage.getItem("demoLoaded") === "true";
-  if (demoLoaded && demoBtn) {
-    demoBtn.textContent = "Hide Demo Data";
-    demoBtn.disabled = false;
-  } else if (demoBtn) {
-    demoBtn.textContent = "View Demo Data";
+  if (demoBtn) {
+    demoBtn.textContent = demoLoaded ? "Hide Demo Data" : "View Demo Data";
     demoBtn.disabled = false;
   }
 
@@ -107,7 +102,6 @@ function logout() {
   updateBackButton("auth");
   showAlert("You’ve been signed out.", "success");
 
-  // Reset demo button
   const demoBtn = document.getElementById("demoBtn");
   if (demoBtn) {
     demoBtn.textContent = "View Demo Data";
@@ -122,7 +116,7 @@ window.onload = () => {
 };
 
 // ========== LOAD POSTS ==========
-async function loadPosts(category = "All") {
+async function loadPosts(category = "All", hideDemos = false) {
   const loading = document.getElementById("loading");
   const postsList = document.getElementById("postsList");
 
@@ -131,15 +125,12 @@ async function loadPosts(category = "All") {
 
   try {
     const res = await fetch(`${API_URL}/posts`);
-    console.log("🛰️ Fetching posts:", res.status, res.statusText);
     const text = await res.text();
-    console.log("📦 Raw response:", text);
-
     let posts;
+
     try {
       posts = JSON.parse(text);
     } catch {
-      console.error("💥 Could not parse posts JSON!");
       showAlert("Server returned invalid data.", "error");
       return;
     }
@@ -147,7 +138,6 @@ async function loadPosts(category = "All") {
     loading.classList.add("hidden");
 
     if (!res.ok) {
-      console.error("❌ Failed to load posts:", posts);
       showAlert(posts.message || "Failed to load posts.", "error");
       return;
     }
@@ -157,13 +147,25 @@ async function loadPosts(category = "All") {
       return;
     }
 
-    const filteredPosts =
+    let filteredPosts =
       category === "All" ? posts : posts.filter((p) => p.category === category);
+
+    // 🔸 NEW: hide demo posts if flag is true
+    if (hideDemos) {
+      filteredPosts = filteredPosts.filter(
+        (p) => !(p.author?.email?.includes("@volsforum.com"))
+      );
+    }
 
     postsList.innerHTML = "";
     filteredPosts.forEach((p) => {
       const div = document.createElement("div");
       div.className = "post";
+
+      // 🔸 visually tag demo posts
+      const isDemo = p.author?.email?.includes("@volsforum.com");
+      if (isDemo) div.classList.add("demo-post");
+
       div.innerHTML = `
         <h3>${p.title}</h3>
         <p>${p.content}</p>
@@ -178,7 +180,6 @@ async function loadPosts(category = "All") {
     });
   } catch (error) {
     loading.classList.add("hidden");
-    console.error("💥 loadPosts() failed:", error);
     showAlert("Failed to load posts. Check console.", "error");
   }
 }
@@ -224,9 +225,15 @@ function filterByCategory(category) {
 
   const clicked = document.querySelector(
     `.category-btn:nth-child(${
-      ["All", "General", "Tech", "Gaming", "Education", "Misc"].indexOf(
-        category
-      ) + 1
+      [
+        "All",
+        "Game Day Talk",
+        "Players & Recruiting",
+        "Stats & Analysis",
+        "Vols History",
+        "SEC Rivalries",
+        "Fan Zone",
+      ].indexOf(category) + 1
     })`
   );
   if (clicked) clicked.classList.add("active");
@@ -239,24 +246,21 @@ async function viewDemoData() {
   const demoBtn = document.getElementById("demoBtn");
   const demoLoaded = localStorage.getItem("demoLoaded") === "true";
 
-  // 👇 If already loaded, hide demo posts visually
   if (demoLoaded) {
-    const postsList = document.getElementById("postsList");
-    postsList.innerHTML = `<p class="muted">Demo data hidden. Click again to show it.</p>`;
     localStorage.removeItem("demoLoaded");
     demoBtn.textContent = "View Demo Data";
     showAlert("Demo data hidden.", "success");
+    loadPosts("All", true);
     return;
   }
 
-  // 👇 Otherwise, load demo data from server
   try {
-    showAlert("Loading demo data...", "success");
+    showAlert("Loading Vols demo data...", "success");
     const res = await fetch(`${API_URL}/seed/demo`, { method: "POST" });
     const data = await res.json();
 
     if (res.ok) {
-      showAlert(data.message || "Demo data loaded!", "success");
+      showAlert(data.message || "Vols demo data loaded!", "success");
       localStorage.setItem("demoLoaded", "true");
       demoBtn.textContent = "Hide Demo Data";
       demoBtn.disabled = false;
@@ -265,7 +269,6 @@ async function viewDemoData() {
       showAlert(data.message || "Failed to load demo data.", "error");
     }
   } catch (error) {
-    console.error("💥 viewDemoData() failed:", error);
     showAlert("Failed to connect to server.", "error");
   }
 }
