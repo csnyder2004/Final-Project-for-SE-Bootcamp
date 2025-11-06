@@ -386,3 +386,7 @@ body.authed #forum,
 body.authed #createPost {
   display: block !important;
 }
+.demo-post {
+  border-left: 4px solid var(--accent);
+  background: rgba(56, 189, 248, 0.1);
+}

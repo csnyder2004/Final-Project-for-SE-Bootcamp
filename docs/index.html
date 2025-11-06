@@ -61,17 +61,8 @@
     <section id="welcome" class="hidden card">
       <h2 id="welcomeMessage"></h2>
       <button onclick="logout()">Logout</button>
+      <button id="demoBtn" onclick="viewDemoData()">View Demo Data</button> <!-- ✅ Clean single button -->
     </section>
-
-   <!-- ===== example data for demo mode ===== -->
-    <div class="demo-section">
-      <hr />
-      <h3>💾 Demo Mode</h3>
-      <p>Click below to reset the database and load demo users/posts.</p>
-      <button onclick="loadDemoData()">Load Demo Data</button>
-    </div>
-
-
 
     <!-- ===== FORUM SECTION ===== -->
     <section id="forum" class="hidden">
@@ -175,6 +166,15 @@
         else backBtn.classList.remove("hidden"); // keep visible for auth toggle
       };
       refreshBackBtn();
+
+      // Optional polish: auto-disable the demo button if demo already loaded
+      document.addEventListener("DOMContentLoaded", () => {
+        const demoBtn = document.getElementById("demoBtn");
+        if (localStorage.getItem("demoLoaded") === "true" && demoBtn) {
+          demoBtn.textContent = "Demo Data Loaded ✅";
+          demoBtn.disabled = true;
+        }
+      });
     })();
   </script>
 </body>

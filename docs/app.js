@@ -9,7 +9,6 @@ function toggleForm(type) {
   registerForm.classList.toggle("active", type === "register");
   loginForm.classList.toggle("active", type === "login");
 
-  // Auto-focus the first field for convenience
   const focusField =
     type === "register"
       ? document.getElementById("registerUsername")
@@ -60,7 +59,8 @@ async function login() {
     });
 
     const data = await res.json();
-    if (!res.ok) return showAlert(data.message || "Invalid credentials.", "error");
+    if (!res.ok)
+      return showAlert(data.message || "Invalid credentials.", "error");
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("username", data.user.username);
@@ -73,7 +73,7 @@ async function login() {
 // ========== SECTION VISIBILITY ==========
 function showWelcome() {
   console.log("✅ showWelcome() running");
-  document.body.classList.add("authed"); // 👈 NEW LINE
+  document.body.classList.add("authed");
   document.getElementById("auth-forms").classList.add("hidden");
   document.getElementById("welcome").classList.remove("hidden");
   document.getElementById("forum").classList.remove("hidden");
@@ -88,7 +88,7 @@ function showWelcome() {
 
 function logout() {
   localStorage.clear();
-  document.body.classList.remove("authed"); // 👈 NEW LINE
+  document.body.classList.remove("authed");
   document.getElementById("auth-forms").classList.remove("hidden");
   document.getElementById("welcome").classList.add("hidden");
   document.getElementById("forum").classList.add("hidden");
@@ -112,11 +112,7 @@ async function loadPosts(category = "All") {
   postsList.innerHTML = "";
 
   try {
-    const res = await fetch(`${API_URL}/posts`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
+    const res = await fetch(`${API_URL}/posts`);
     console.log("🛰️ Fetching posts:", res.status, res.statusText);
     const text = await res.text();
     console.log("📦 Raw response:", text);
@@ -155,7 +151,9 @@ async function loadPosts(category = "All") {
         <p>${p.content}</p>
         <small>
           <strong>${p.category || "General"}</strong> |
-          By ${p.author?.username || "Unknown"} on ${new Date(p.createdAt).toLocaleString()}
+          By ${p.author?.username || "Unknown"} on ${new Date(
+        p.createdAt
+      ).toLocaleString()}
         </small>
       `;
       postsList.appendChild(div);
@@ -207,43 +205,47 @@ function filterByCategory(category) {
     .forEach((btn) => btn.classList.remove("active"));
 
   const clicked = document.querySelector(
-    `.category-btn:nth-child(${["All", "General", "Tech", "Gaming", "Education", "Misc"].indexOf(category) + 1})`
+    `.category-btn:nth-child(${
+      ["All", "General", "Tech", "Gaming", "Education", "Misc"].indexOf(
+        category
+      ) + 1
+    })`
   );
   if (clicked) clicked.classList.add("active");
 
   loadPosts(category);
 }
 
-// ========== LOAD DEMO DATA ==========
-async function loadDemoData() {
-  if (!confirm("⚠️ This will reset all data. Continue?")) return;
-
+// ========== VIEW DEMO DATA ==========
+async function viewDemoData() {
   try {
-    const res = await fetch(`${API_URL}/seed/demo`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-
+    showAlert("Loading demo data...", "success");
+    const res = await fetch(`${API_URL}/seed/demo`, { method: "POST" });
     const data = await res.json();
-    showAlert(data.message, res.ok ? "success" : "error");
 
-    if (res.ok && data.demoAccounts) {
-      console.table(data.demoAccounts);
-      showAlert("Demo users created! Log in as 'coleman@example.com' / password123", "success");
+    if (res.ok) {
+      showAlert(data.message || "Demo data loaded!", "success");
+      localStorage.setItem("demoLoaded", "true");
+      const demoBtn = document.getElementById("demoBtn");
+      if (demoBtn) {
+        demoBtn.textContent = "Demo Data Loaded ✅";
+        demoBtn.disabled = true;
+      }
+      loadPosts();
+    } else {
+      showAlert(data.message || "Failed to load demo data.", "error");
     }
   } catch (error) {
-    console.error("💥 loadDemoData() failed:", error);
-    showAlert("Failed to seed demo data.", "error");
+    console.error("💥 viewDemoData() failed:", error);
+    showAlert("Failed to connect to server.", "error");
   }
 }
-
 
 // ========== BACK BUTTON ==========
 function goBack() {
   const token = localStorage.getItem("token");
-  if (token) {
-    logout();
-  } else {
+  if (token) logout();
+  else {
     const loginActive = document
       .getElementById("loginForm")
       .classList.contains("active");
@@ -253,7 +255,8 @@ function goBack() {
 
 function updateBackButton(state) {
   const backBtn = document.getElementById("backButton");
-  if (state === "forum" || state === "auth") backBtn.classList.remove("hidden");
+  if (state === "forum" || state === "auth")
+    backBtn.classList.remove("hidden");
   else backBtn.classList.add("hidden");
 }
 
