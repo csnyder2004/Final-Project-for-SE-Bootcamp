@@ -40,6 +40,25 @@ app.use(cors(corsOptions));
 // ===== Body parser =====
 app.use(express.json());
 
+/* ==========================================================
+   💓 Heartbeat Logger (detects Uptime Robot pings)
+   ========================================================== */
+app.use((req, res, next) => {
+  const ua = req.headers["user-agent"] || "";
+  if (ua.includes("UptimeRobot")) {
+    console.log(`💓 Uptime Robot ping at ${new Date().toLocaleString()}`);
+  }
+  next();
+});
+
+/* ==========================================================
+   🩺 Dedicated /ping endpoint (for uptime monitoring)
+   ========================================================== */
+app.get("/ping", (_req, res) => {
+  console.log(`💓 Ping endpoint hit at ${new Date().toLocaleString()}`);
+  res.status(200).json({ message: "Server awake 💪", time: new Date().toISOString() });
+});
+
 // ===== Root / Health routes =====
 app.get("/", (_req, res) => {
   res.send("✅ Project 4 Forum API is running and connected to MongoDB!");

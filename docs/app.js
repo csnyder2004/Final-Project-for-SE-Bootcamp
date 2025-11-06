@@ -174,7 +174,6 @@ function toggleForm(type) {
       ? document.getElementById("registerUsername")
       : document.getElementById("loginEmail");
   if (focusField) focusField.focus();
-  updateBackButton("auth");
 }
 
 /* =========================================================
@@ -273,7 +272,7 @@ async function login() {
 }
 
 /* =========================================================
-   Section visibility & back button
+   Section visibility
    ========================================================= */
 function showWelcome() {
   document.body.classList.add("authed");
@@ -292,7 +291,6 @@ function showWelcome() {
     demoBtn.disabled = false;
   }
 
-  updateBackButton("forum");
   loadPosts();
 }
 
@@ -303,7 +301,6 @@ function logout() {
   document.getElementById("welcome").classList.add("hidden");
   document.getElementById("forum").classList.add("hidden");
   toggleForm("login");
-  updateBackButton("auth");
   showAlert("You’ve been signed out.", "success");
 
   const demoBtn = document.getElementById("demoBtn");
@@ -472,6 +469,7 @@ async function viewDemoData() {
     showAlert("Failed to connect to server.", "error");
   }
 }
+
 /* =========================================================
    🌡️ Keep Render Backend Awake (heartbeat ping)
    ========================================================= */
