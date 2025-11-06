@@ -492,38 +492,48 @@ setInterval(async () => {
 }, 240000); // every 4 minutes
 
 /* =========================================================
-   📜 Terms & Conditions Modal
+   📜 Terms & Conditions Modal (reliable DOM-safe version)
    ========================================================= */
-(function () {
-  const openLink = document.getElementById("openTermsLink");
+window.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("termsModal");
   const backdrop = document.getElementById("termsBackdrop");
   const closeBtn = document.getElementById("closeTermsBtn");
+  const acceptBtn = document.getElementById("acceptTermsBtn"); // optional extra button
+  const openLink = document.getElementById("openTermsLink");
   const checkbox = document.getElementById("registerTerms");
+
+  if (!modal || !openLink) return;
 
   function openTerms(e) {
     e.preventDefault();
-    if (!modal) return;
     modal.classList.remove("hidden");
     closeBtn?.focus();
   }
 
   function closeTerms() {
-    if (!modal) return;
     modal.classList.add("hidden");
   }
 
-  if (openLink) openLink.addEventListener("click", openTerms);
-  if (backdrop) backdrop.addEventListener("click", closeTerms);
-  if (closeBtn) closeBtn.addEventListener("click", closeTerms);
+  openLink.addEventListener("click", openTerms);
+  backdrop?.addEventListener("click", closeTerms);
+  closeBtn?.addEventListener("click", closeTerms);
 
   document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape" && !modal.classList.contains("hidden")) closeTerms();
+    if (ev.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeTerms();
+    }
   });
 
-  if (checkbox) {
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) clearCheckboxError("registerTerms");
+  // Optional: “Accept Terms” button checks the box automatically
+  if (acceptBtn) {
+    acceptBtn.addEventListener("click", () => {
+      if (checkbox) checkbox.checked = true;
+      clearCheckboxError("registerTerms");
+      closeTerms();
     });
   }
-})();
+
+  if (checkbox) {
+    checkbox.addEventListener("change", () => clearCheckboxError("registerTerms"));
+  }
+});

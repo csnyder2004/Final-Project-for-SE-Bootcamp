@@ -22,9 +22,6 @@
     </div>
   </header>
 
-  <!-- ===== BACK BUTTON ===== --
-  <button id="backButton" class="back-btn hidden" onclick="goBack()">← Back</button>===== -->
-
   <!-- ===== MAIN CONTENT ===== -->
   <main class="container">
 
@@ -42,8 +39,6 @@
           <input type="checkbox" id="registerTerms" />
           <span>I agree to the <a href="#" id="openTermsLink">Terms &amp; Conditions</a></span>
         </label>
-
-
 
         <button onclick="register()">Sign Up</button>
         <p>Already have an account?
@@ -73,9 +68,7 @@
     <section id="forum" class="hidden">
       <h2>Vols Forum Dashboard</h2>
 
-      <!-- 🧱 LAYOUT WRAPPER -->
       <div id="forumWrapper">
-
         <!-- === LEFT SIDEBAR: Categories === -->
         <aside id="categorySidebar" class="card" role="navigation" aria-label="Categories">
           <h3>Categories</h3>
@@ -92,7 +85,7 @@
 
         <!-- === RIGHT CONTENT: Posts & Create === -->
         <section id="forumMain">
-          <!-- Create Post (visible after login) -->
+          <!-- Create Post -->
           <div id="createPost" class="hidden card">
             <h3>Create a New Post</h3>
             <input type="text" id="postTitle" placeholder="Post title" required />
@@ -110,7 +103,7 @@
             <button onclick="createPost()">Publish</button>
           </div>
 
-          <!-- Posts List / Placeholder -->
+          <!-- Posts List -->
           <div id="postsList" class="posts">
             <p class="muted" id="postsPlaceholder">
               Select a Category to view Vols discussions.
@@ -136,55 +129,6 @@
     </p>
   </footer>
 
-  <!-- Pre-auth bootstrap -->
-  <script>
-    (function () {
-      try {
-        if (localStorage.getItem("token")) {
-          document.body.classList.add("authed");
-        }
-      } catch (e) {}
-    })();
-  </script>
-
-  <!-- App logic -->
-  <script src="app.js"></script>
-
-  <!-- Keep authed class in sync with your existing functions -->
-  <script>
-    (function () {
-      const wrap = (name, before) => {
-        if (typeof window[name] === "function") {
-          const original = window[name];
-          window[name] = function () {
-            try { before && before(); } catch (e) {}
-            return original.apply(this, arguments);
-          };
-        }
-      };
-
-      wrap("showWelcome", () => {
-        document.body.classList.add("authed");
-        const name = localStorage.getItem("username") || "";
-        const headerUser = document.getElementById("headerUsername");
-        const userHeader = document.getElementById("userHeader");
-        if (headerUser) headerUser.textContent = name ? `Signed in as ${name}` : "";
-        if (userHeader) userHeader.classList.remove("hidden");
-
-        const backBtn = document.getElementById("backButton");
-        if (backBtn) backBtn.classList.remove("hidden");
-      });
-
-      wrap("logout", () => {
-        document.body.classList.remove("authed");
-        const userHeader = document.getElementById("userHeader");
-        if (userHeader) userHeader.classList.add("hidden");
-
-        const backBtn = document.getElementById("backButton");
-        if (backBtn) backBtn.classList.add("hidden");
-      });
-    })();
-  </script>
   <!-- ===== Terms & Conditions Modal ===== -->
   <div id="termsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
     <div class="modal-backdrop" id="termsBackdrop"></div>
@@ -207,10 +151,55 @@
         <p><em>Note:</em> This is not a real production service. It’s a demonstration project for grading purposes only.</p>
       </section>
       <footer class="modal-footer">
+        <button id="acceptTermsBtn">Accept Terms</button>
         <button id="closeTermsBtn">Close</button>
       </footer>
     </div>
   </div>
 
+  <!-- ===== SCRIPTS ===== -->
+  <!-- Pre-auth bootstrap -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("token")) {
+          document.body.classList.add("authed");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- App logic -->
+  <script src="app.js"></script>
+
+  <!-- Sync header and authed state -->
+  <script>
+    (function () {
+      const wrap = (name, before) => {
+        if (typeof window[name] === "function") {
+          const original = window[name];
+          window[name] = function () {
+            try { before && before(); } catch (e) {}
+            return original.apply(this, arguments);
+          };
+        }
+      };
+
+      wrap("showWelcome", () => {
+        document.body.classList.add("authed");
+        const name = localStorage.getItem("username") || "";
+        const headerUser = document.getElementById("headerUsername");
+        const userHeader = document.getElementById("userHeader");
+        if (headerUser) headerUser.textContent = name ? `Signed in as ${name}` : "";
+        if (userHeader) userHeader.classList.remove("hidden");
+      });
+
+      wrap("logout", () => {
+        document.body.classList.remove("authed");
+        const userHeader = document.getElementById("userHeader");
+        if (userHeader) userHeader.classList.add("hidden");
+      });
+    })();
+  </script>
 </body>
 </html>
