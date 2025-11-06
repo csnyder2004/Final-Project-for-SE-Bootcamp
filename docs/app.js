@@ -3,9 +3,10 @@ const API_URL = "https://project4-forum-backend.onrender.com/api";
 
 /* =========================================================
    🚀 Render Free-Tier Wake-Up Handler (improved)
-========================================================= */
+   ========================================================= */
 async function fetchWithWake(url, options = {}, retries = 6) {
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   try {
     const res = await fetch(url, options);
     if (res.ok) return res;
@@ -18,6 +19,7 @@ async function fetchWithWake(url, options = {}, retries = 6) {
       await delay(10000); // wait 10s, then retry
       return fetchWithWake(url, options, retries - 1);
     }
+
     return res;
   } catch (err) {
     // Network failure (Render still starting up)
@@ -35,9 +37,10 @@ async function fetchWithWake(url, options = {}, retries = 6) {
   }
 }
 
+
 /* =========================================================
    Small helpers for inline field errors & strength meter
-========================================================= */
+   ========================================================= */
 function ensureErrorEl(inputEl) {
   if (!inputEl) return null;
   if (!inputEl.parentElement.style.position) {
@@ -62,7 +65,6 @@ function ensureErrorEl(inputEl) {
   }
   return err;
 }
-
 function showFieldError(inputId, msg) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -71,7 +73,6 @@ function showFieldError(inputId, msg) {
   input.setAttribute("aria-invalid", "true");
   input.style.borderColor = "#ef4444";
 }
-
 function clearFieldError(inputId) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -80,7 +81,6 @@ function clearFieldError(inputId) {
   input.removeAttribute("aria-invalid");
   input.style.borderColor = "";
 }
-
 function setCheckboxError(checkboxId, msg) {
   const cb = document.getElementById(checkboxId);
   if (!cb) return;
@@ -104,7 +104,6 @@ function setCheckboxError(checkboxId, msg) {
   }
   err.textContent = msg || "";
 }
-
 function clearCheckboxError(checkboxId) {
   const cb = document.getElementById(checkboxId);
   if (!cb) return;
@@ -116,9 +115,9 @@ function clearCheckboxError(checkboxId) {
   container.style.outlineOffset = "";
 }
 
-/* ================================ 
+/* ================================
    Password strength (simple)
-================================ */
+   ================================ */
 function passwordStrengthScore(pw) {
   let score = 0;
   if (pw.length >= 6) score++;
@@ -128,7 +127,6 @@ function passwordStrengthScore(pw) {
   if (/[^A-Za-z0-9]/.test(pw)) score++;
   return Math.min(score, 4);
 }
-
 function ensureStrengthEl() {
   let el = document.getElementById("passwordStrength");
   if (!el) {
@@ -145,7 +143,6 @@ function ensureStrengthEl() {
   }
   return el;
 }
-
 function renderStrength(pw) {
   const el = ensureStrengthEl();
   if (!el) return;
@@ -158,7 +155,7 @@ function renderStrength(pw) {
 
 /* =========================================================
    Alerts (with new 'warning' style)
-========================================================= */
+   ========================================================= */
 function showAlert(message, type = "success") {
   let alertBox = document.getElementById("alertBox");
   if (!alertBox) {
@@ -175,7 +172,7 @@ function showAlert(message, type = "success") {
 
 /* =========================================================
    Form toggling
-========================================================= */
+   ========================================================= */
 function toggleForm(type) {
   const registerForm = document.getElementById("registerForm");
   const loginForm = document.getElementById("loginForm");
@@ -190,7 +187,7 @@ function toggleForm(type) {
 
 /* =========================================================
    Register
-========================================================= */
+   ========================================================= */
 async function register() {
   const username = (document.getElementById("registerUsername")?.value || "").trim();
   const email = (document.getElementById("registerEmail")?.value || "").trim();
@@ -202,43 +199,20 @@ async function register() {
   if (terms) clearCheckboxError("registerTerms");
 
   let hasError = false;
-  if (!username) {
-    showFieldError("registerUsername", "Required");
-    hasError = true;
-  } else if (username.length < 3) {
-    showFieldError("registerUsername", "Min 3 characters");
-    hasError = true;
-  }
+  if (!username) { showFieldError("registerUsername", "Required"); hasError = true; }
+  else if (username.length < 3) { showFieldError("registerUsername", "Min 3 characters"); hasError = true; }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) {
-    showFieldError("registerEmail", "Required");
-    hasError = true;
-  } else if (!emailRegex.test(email)) {
-    showFieldError("registerEmail", "Invalid email");
-    hasError = true;
-  }
+  if (!email) { showFieldError("registerEmail", "Required"); hasError = true; }
+  else if (!emailRegex.test(email)) { showFieldError("registerEmail", "Invalid email"); hasError = true; }
 
-  if (!password) {
-    showFieldError("registerPassword", "Required");
-    hasError = true;
-  } else if (password.length < 6) {
-    showFieldError("registerPassword", "Min 6 characters");
-    hasError = true;
-  }
+  if (!password) { showFieldError("registerPassword", "Required"); hasError = true; }
+  else if (password.length < 6) { showFieldError("registerPassword", "Min 6 characters"); hasError = true; }
 
-  if (!confirm) {
-    showFieldError("confirmPassword", "Required");
-    hasError = true;
-  } else if (password !== confirm) {
-    showFieldError("confirmPassword", "Does not match");
-    hasError = true;
-  }
+  if (!confirm) { showFieldError("confirmPassword", "Required"); hasError = true; }
+  else if (password !== confirm) { showFieldError("confirmPassword", "Does not match"); hasError = true; }
 
-  if (terms && !terms.checked) {
-    setCheckboxError("registerTerms", "Please accept");
-    hasError = true;
-  }
+  if (terms && !terms.checked) { setCheckboxError("registerTerms", "Please accept"); hasError = true; }
 
   if (hasError) return showAlert("Please fix the highlighted fields.", "error");
 
@@ -248,8 +222,8 @@ async function register() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),
     });
-
     const data = await res.json();
+
     if (!res.ok) {
       const msg = (data && data.message) || "Registration failed.";
       const lower = msg.toLowerCase();
@@ -269,21 +243,15 @@ async function register() {
 
 /* =========================================================
    Login
-========================================================= */
+   ========================================================= */
 async function login() {
   const email = (document.getElementById("loginEmail")?.value || "").trim();
   const password = (document.getElementById("loginPassword")?.value || "").trim();
-  ["loginEmail", "loginPassword"].forEach(clearFieldError);
 
+  ["loginEmail", "loginPassword"].forEach(clearFieldError);
   let hasError = false;
-  if (!email) {
-    showFieldError("loginEmail", "Required");
-    hasError = true;
-  }
-  if (!password) {
-    showFieldError("loginPassword", "Required");
-    hasError = true;
-  }
+  if (!email) { showFieldError("loginEmail", "Required"); hasError = true; }
+  if (!password) { showFieldError("loginPassword", "Required"); hasError = true; }
   if (hasError) return showAlert("Please enter both email and password.", "error");
 
   try {
@@ -292,8 +260,8 @@ async function login() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
     const data = await res.json();
+
     if (!res.ok) {
       const msg = (data && data.message) || "Login failed.";
       if (msg.toLowerCase().includes("password")) showFieldError("loginPassword", "Incorrect");
@@ -314,7 +282,7 @@ async function login() {
 
 /* =========================================================
    Section visibility
-========================================================= */
+   ========================================================= */
 function showWelcome() {
   document.body.classList.add("authed");
   document.getElementById("auth-forms").classList.add("hidden");
@@ -353,15 +321,14 @@ function logout() {
 
 /* =========================================================
    Auto-login on load
-========================================================= */
+   ========================================================= */
 window.onload = () => {
   const attach = (id, evt = "input", fn = () => clearFieldError(id)) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener(evt, fn);
   };
-  ["registerUsername", "registerEmail", "registerPassword", "confirmPassword", "loginEmail", "loginPassword"].forEach((id) =>
-    attach(id)
-  );
+  ["registerUsername", "registerEmail", "registerPassword", "confirmPassword", "loginEmail", "loginPassword"]
+    .forEach((id) => attach(id));
 
   const pwd = document.getElementById("registerPassword");
   if (pwd) pwd.addEventListener("input", () => renderStrength(pwd.value));
@@ -378,3 +345,184 @@ window.onload = () => {
   if (localStorage.getItem("token")) showWelcome();
   else toggleForm("register");
 };
+
+/* =========================================================
+   Posts loading & demo toggle
+   ========================================================= */
+async function loadPosts(category = "All", hideDemos = false) {
+  const loading = document.getElementById("loading");
+  const postsList = document.getElementById("postsList");
+
+  loading.classList.remove("hidden");
+  postsList.innerHTML = "";
+
+  try {
+    const res = await fetchWithWake(`${API_URL}/posts`);
+    const text = await res.text();
+    let posts;
+    try {
+      posts = JSON.parse(text);
+    } catch {
+      showAlert("Server returned invalid data.", "error");
+      return;
+    }
+
+    loading.classList.add("hidden");
+
+    if (!res.ok) {
+      showAlert(posts.message || "Failed to load posts.", "error");
+      return;
+    }
+
+    if (!Array.isArray(posts) || posts.length === 0) {
+      postsList.innerHTML = `<p class="muted">No posts yet — be the first to start a discussion!</p>`;
+      return;
+    }
+
+    let filteredPosts =
+      category === "All" ? posts : posts.filter((p) => p.category === category);
+
+    if (hideDemos) {
+      filteredPosts = filteredPosts.filter(
+        (p) =>
+          !["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(
+            p.author?.username
+          )
+      );
+    }
+
+    postsList.innerHTML = "";
+    filteredPosts.forEach((p) => {
+      const div = document.createElement("div");
+      div.className = "post";
+      const isDemo = ["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(
+        p.author?.username
+      );
+      if (isDemo) div.classList.add("demo-post");
+      div.innerHTML = `
+        <h3>${p.title}</h3>
+        <p>${p.content}</p>
+        <small>
+          <strong>${p.category || "General"}</strong> |
+          By ${p.author?.username || "Unknown"} on ${new Date(p.createdAt).toLocaleString()}
+        </small>`;
+      postsList.appendChild(div);
+    });
+  } catch (error) {
+    loading.classList.add("hidden");
+    showAlert("Failed to load posts. Check console.", "error");
+  }
+}
+
+async function createPost() {
+  const token = localStorage.getItem("token");
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const category = document.getElementById("postCategory").value;
+  if (!title) return showFieldError("postTitle", "Required");
+  if (!content) return showFieldError("postContent", "Required");
+
+  try {
+    const res = await fetchWithWake(`${API_URL}/posts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title, content, category }),
+    });
+    const data = await res.json();
+    showAlert(data.message, res.ok ? "success" : "error");
+    if (res.ok) {
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "";
+      loadPosts();
+    }
+  } catch {
+    showAlert("Unable to create post. Please try again later.", "error");
+  }
+}
+
+function filterByCategory(category) {
+  document.querySelectorAll(".category-btn").forEach((btn) => btn.classList.remove("active"));
+  const clicked = document.querySelector(
+    `.category-btn:nth-child(${["All", "Game Day Talk", "Players & Recruiting", "Stats & Analysis", "Vols History", "SEC Rivalries", "Fan Zone"].indexOf(category) + 1})`
+  );
+  if (clicked) clicked.classList.add("active");
+  loadPosts(category);
+}
+
+async function viewDemoData() {
+  const demoBtn = document.getElementById("demoBtn");
+  const demoLoaded = localStorage.getItem("demoLoaded") === "true";
+  if (demoLoaded) {
+    localStorage.removeItem("demoLoaded");
+    if (demoBtn) demoBtn.textContent = "View Demo Data";
+    showAlert("Demo data hidden.", "success");
+    await loadPosts("All", true);
+    return;
+  }
+  try {
+    showAlert("Checking for Vols demo data...", "success");
+    const res = await fetchWithWake(`${API_URL}/seed/demo`, { method: "POST" });
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem("demoLoaded", "true");
+      if (demoBtn) demoBtn.textContent = "Hide Demo Data";
+      showAlert(data.message || "Vols demo data loaded!", "success");
+      await loadPosts();
+    } else {
+      showAlert(data.message || "Failed to load demo data.", "error");
+    }
+  } catch (error) {
+    showAlert("Failed to connect to server.", "error");
+  }
+}
+
+/* =========================================================
+   🌡️ Keep Render Backend Awake (heartbeat ping)
+   ========================================================= */
+setInterval(async () => {
+  try {
+    await fetch(`${API_URL}/posts`, { method: "GET" });
+    console.log("💓 Pinged backend to keep it awake");
+  } catch (err) {
+    console.warn("⚠️ Backend ping failed (server may be restarting)");
+  }
+}, 240000); // every 4 minutes
+/* =========================================================
+   📜 Terms & Conditions Modal
+   ========================================================= */
+(function () {
+  const openLink = document.getElementById("openTermsLink");
+  const modal = document.getElementById("termsModal");
+  const backdrop = document.getElementById("termsBackdrop");
+  const closeBtn = document.getElementById("closeTermsBtn");
+  const checkbox = document.getElementById("registerTerms");
+
+  function openTerms(e) {
+    e.preventDefault();
+    if (!modal) return;
+    modal.classList.remove("hidden");
+    closeBtn?.focus();
+  }
+
+  function closeTerms() {
+    if (!modal) return;
+    modal.classList.add("hidden");
+  }
+
+  if (openLink) openLink.addEventListener("click", openTerms);
+  if (backdrop) backdrop.addEventListener("click", closeTerms);
+  if (closeBtn) closeBtn.addEventListener("click", closeTerms);
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && !modal.classList.contains("hidden")) closeTerms();
+  });
+
+  if (checkbox) {
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) clearCheckboxError("registerTerms");
+    });
+  }
+})();
