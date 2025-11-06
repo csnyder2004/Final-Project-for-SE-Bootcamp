@@ -490,3 +490,40 @@ setInterval(async () => {
     console.warn("⚠️ Backend ping failed (server may be restarting)");
   }
 }, 240000); // every 4 minutes
+
+/* =========================================================
+   📜 Terms & Conditions Modal
+   ========================================================= */
+(function () {
+  const openLink = document.getElementById("openTermsLink");
+  const modal = document.getElementById("termsModal");
+  const backdrop = document.getElementById("termsBackdrop");
+  const closeBtn = document.getElementById("closeTermsBtn");
+  const checkbox = document.getElementById("registerTerms");
+
+  function openTerms(e) {
+    e.preventDefault();
+    if (!modal) return;
+    modal.classList.remove("hidden");
+    closeBtn?.focus();
+  }
+
+  function closeTerms() {
+    if (!modal) return;
+    modal.classList.add("hidden");
+  }
+
+  if (openLink) openLink.addEventListener("click", openTerms);
+  if (backdrop) backdrop.addEventListener("click", closeTerms);
+  if (closeBtn) closeBtn.addEventListener("click", closeTerms);
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && !modal.classList.contains("hidden")) closeTerms();
+  });
+
+  if (checkbox) {
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) clearCheckboxError("registerTerms");
+    });
+  }
+})();
