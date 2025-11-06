@@ -16,7 +16,13 @@ router.post("/demo", async (_req, res) => {
     console.log("🌱 Seeding Tennessee Vols Football demo data...");
 
     // 🧹 Clean up any previous Vols demo data to prevent duplicates
-    await User.deleteMany({ email: /@volsforum\.com$/ });
+    await User.deleteMany({
+      $or: [
+        { email: /@volsforum\.com$/ },
+        { username: { $in: ["SmokeyTheDog", "NeylandLegend", "RockyTopFan"] } },
+      ],
+    });
+
     await Post.deleteMany({
       category: {
         $in: [
