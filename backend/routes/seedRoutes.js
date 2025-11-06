@@ -9,21 +9,18 @@ const router = express.Router();
 /**
  * POST /api/seed/demo
  * Seeds Vols Football–themed demo users and posts.
- * Can be safely re-run — automatically clears old demo data first.
+ * Safe to call multiple times — only seeds if not already present.
  */
 router.post("/demo", async (_req, res) => {
   try {
-    console.log("🌱 Seeding Tennessee Vols Football demo data...");
+    console.log("🌱 Checking for existing Vols demo data...");
 
-    // 🧹 Clean up any previous Vols demo data to prevent duplicates
-    await User.deleteMany({
-      $or: [
-        { email: /@volsforum\.com$/ },
-        { username: { $in: ["SmokeyTheDog", "NeylandLegend", "RockyTopFan"] } },
-      ],
+    // ✅ Check if demo users already exist
+    const existingUsers = await User.find({
+      email: { $regex: "@volsforum\\.com$", $options: "i" },
     });
 
-    await Post.deleteMany({
+    const existingPosts = await Post.find({
       category: {
         $in: [
           "Game Day Talk",
@@ -36,10 +33,23 @@ router.post("/demo", async (_req, res) => {
       },
     });
 
-    // 🔐 Hash password for all demo users
+    // ✅ If both users and posts exist, skip reseeding
+    if (existingUsers.length > 0 && existingPosts.length > 0) {
+      console.log("✅ Demo data already loaded — skipping reseed.");
+      return res.json({
+        message: "🏈 Vols demo data already loaded!",
+        demoAccounts: [
+          { email: "smokey@volsforum.com", password: "govols123" },
+          { email: "neyland@volsforum.com", password: "govols123" },
+          { email: "rocky@volsforum.com", password: "govols123" },
+        ],
+      });
+    }
+
+    console.log("🌱 Seeding Tennessee Vols Football demo data...");
     const hashedPass = await bcrypt.hash("govols123", 10);
 
-    // 👤 Demo users
+    // 👤 Create demo users
     const users = await User.insertMany([
       {
         username: "SmokeyTheDog",
@@ -58,7 +68,7 @@ router.post("/demo", async (_req, res) => {
       },
     ]);
 
-    // 🏈 Demo posts for each Vols category
+    // 🏈 Insert demo posts
     await Post.insertMany([
       {
         title: "🔥 Game Day Thread: Vols vs Alabama!",

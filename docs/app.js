@@ -151,7 +151,7 @@ async function loadPosts(category = "All", hideDemos = false) {
     let filteredPosts =
       category === "All" ? posts : posts.filter((p) => p.category === category);
 
-    // ✅ Hide demo posts when requested (no email needed)
+    // ✅ Hide demo posts when requested
     if (hideDemos) {
       filteredPosts = filteredPosts.filter(
         (p) =>
@@ -167,13 +167,10 @@ async function loadPosts(category = "All", hideDemos = false) {
       const div = document.createElement("div");
       div.className = "post";
 
-      // Highlight demo posts
-      if (
-        ["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(
-          p.author?.username
-        )
-      )
-        div.classList.add("demo-post");
+      const isDemo = ["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(
+        p.author?.username
+      );
+      if (isDemo) div.classList.add("demo-post");
 
       div.innerHTML = `
         <h3>${p.title}</h3>
@@ -255,27 +252,27 @@ async function viewDemoData() {
   const demoBtn = document.getElementById("demoBtn");
   const demoLoaded = localStorage.getItem("demoLoaded") === "true";
 
-  // Hide demo posts
   if (demoLoaded) {
+    // 🔸 Hide demo posts
     localStorage.removeItem("demoLoaded");
     demoBtn.textContent = "View Demo Data";
     showAlert("Demo data hidden.", "success");
-    loadPosts("All", true);
+    await loadPosts("All", true);
     return;
   }
 
-  // Load demo data
   try {
-    showAlert("Loading Vols demo data...", "success");
+    // 🔸 Show demo posts (seed if not already)
+    showAlert("Checking for Vols demo data...", "success");
     const res = await fetch(`${API_URL}/seed/demo`, { method: "POST" });
     const data = await res.json();
 
     if (res.ok) {
-      showAlert(data.message || "Vols demo data loaded!", "success");
       localStorage.setItem("demoLoaded", "true");
       demoBtn.textContent = "Hide Demo Data";
       demoBtn.disabled = false;
-      loadPosts();
+      showAlert(data.message || "Vols demo data loaded!", "success");
+      await loadPosts();
     } else {
       showAlert(data.message || "Failed to load demo data.", "error");
     }
