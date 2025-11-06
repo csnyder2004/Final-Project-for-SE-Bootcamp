@@ -379,3 +379,117 @@ body.authed #auth-forms { display: none !important; }
 body.authed #welcome,
 body.authed #forum,
 body.authed #createPost { display: block !important; }
+
+/* ⚠️ Alert / Message Box */
+.alert-box {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 280px;
+  max-width: 400px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  text-align: left;
+}
+
+/* Show animation */
+.alert-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 🔴 Error Alerts */
+.alert-box.error {
+  background: var(--error);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+}
+
+/* 🟢 Success Alerts */
+.alert-box.success {
+  background: var(--success);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+}
+
+/* Optional bounce for extra polish */
+@keyframes alertPop {
+  0% { transform: scale(0.9); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.alert-box.show {
+  animation: alertPop 0.25s ease-out;
+}
+/* =====================================================
+   🔴 Inline Field & Checkbox Error Styling
+   ===================================================== */
+.field-error {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--error);
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+input[aria-invalid="true"] + .field-error,
+.field-error:not(:empty) {
+  opacity: 1;
+}
+
+/* Apply red glow + subtle shake on invalid fields */
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--error) !important;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  animation: fieldShake 0.2s ease;
+}
+
+@keyframes fieldShake {
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+/* Checkbox container red outline */
+label:has(input[type="checkbox"][aria-invalid="true"]) {
+  outline: 2px solid var(--error);
+  outline-offset: 4px;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+/* Fade-in and spacing for password strength meter */
+#passwordStrength {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  text-align: right;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+#passwordStrength:not(:empty) {
+  opacity: 1;
+}
+
+/* Optional: give checkbox error message a smooth inline feel */
+label .field-error {
+  position: static;
+  display: inline-block;
+  margin-left: 6px;
+  transform: none;
+}
