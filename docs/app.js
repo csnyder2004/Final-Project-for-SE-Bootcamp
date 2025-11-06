@@ -2,32 +2,41 @@
 const API_URL = "https://project4-forum-backend.onrender.com/api";
 
 /* =========================================================
-   🚀 Render Free-Tier Wake-Up Handler
+   🚀 Render Free-Tier Wake-Up Handler (improved)
    ========================================================= */
 async function fetchWithWake(url, options = {}, retries = 6) {
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   try {
     const res = await fetch(url, options);
     if (res.ok) return res;
 
-    // Server might still be booting — retry with notice
+    // Server might still be booting — retry with gentle warning
     if (res.status >= 500 && retries > 0) {
-      showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
-      await delay(10000); // wait 10s then retry
+      if (retries === 6) {
+        showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
+      }
+      await delay(10000); // wait 10s, then retry
       return fetchWithWake(url, options, retries - 1);
     }
 
     return res;
   } catch (err) {
-    // Network failure (likely still booting)
+    // Network failure (Render still starting up)
     if (retries > 0) {
-      showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
+      if (retries === 6) {
+        showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
+      }
       await delay(10000);
       return fetchWithWake(url, options, retries - 1);
+    } else {
+      console.error("❌ Network connection failed:", err);
+      showAlert("Unable to connect to server. Please try again later.", "error");
+      throw err;
     }
-    throw err;
   }
 }
+
 
 /* =========================================================
    Small helpers for inline field errors & strength meter
