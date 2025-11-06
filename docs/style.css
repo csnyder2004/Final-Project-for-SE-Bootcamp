@@ -493,3 +493,12 @@ label .field-error {
   margin-left: 6px;
   transform: none;
 }
+/* ⚠️ Warning Alert Style */
+.alert-box.warning {
+  background: rgba(255, 166, 0, 0.2);
+  color: #ffb700;
+  border: 2px solid #ffb700;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 0 12px rgba(255, 183, 0, 0.4);
+}
