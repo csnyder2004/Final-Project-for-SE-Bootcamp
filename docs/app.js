@@ -393,17 +393,22 @@ async function loadPosts(category = "All", hideDemos = false) {
     filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     // 🪧 Placeholder behavior
-    if (!Array.isArray(filteredPosts) || filteredPosts.length === 0) {
-      placeholder.classList.remove("hidden");
-      placeholder.textContent =
-        category === "All"
-          ? "Select a Category to view its questions."
-          : "No posts found in this category yet.";
-      postsList.innerHTML = "";
-      return;
-    } else {
-      placeholder.classList.add("hidden");
-    }
+  if (category === "All" && (!Array.isArray(filteredPosts) || filteredPosts.length === 0)) {
+    placeholder.classList.remove("hidden");
+    placeholder.textContent = "Select a Category to view its questions.";
+    postsList.innerHTML = "";
+    return;
+  }
+
+  if (!Array.isArray(filteredPosts) || filteredPosts.length === 0) {
+    placeholder.classList.remove("hidden");
+    placeholder.textContent = "No posts found in this category yet.";
+    postsList.innerHTML = "";
+    return;
+  } else {
+    placeholder.classList.add("hidden");
+  }
+
 
     postsList.innerHTML = "";
     filteredPosts.forEach((p) => {
