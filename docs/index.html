@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Project 4 Forum</title>
+  <title>🏈 Tennessee Vols Football Forum</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -11,8 +11,8 @@
   <!-- ===== HEADER ===== -->
   <header class="site-header">
     <div class="header-left">
-      <h1 id="appTitle">💬 Project 4 Forum</h1>
-      <p class="subtitle">A modern discussion platform built with Node.js, Express & MongoDB</p>
+      <h1 id="appTitle">🏈 Tennessee Vols Football Forum</h1>
+      <p class="subtitle">Where Vol Nation unites to talk game day, recruiting, and all things orange & white.</p>
     </div>
 
     <!-- Shown after login -->
@@ -32,7 +32,7 @@
     <section id="auth-forms" class="card">
       <!-- Register -->
       <div id="registerForm" class="form active">
-        <h2>Create Your Account</h2>
+        <h2>Create Your Vols Account</h2>
         <input type="text" id="registerUsername" placeholder="Username" required />
         <input type="email" id="registerEmail" placeholder="Email" required />
         <input type="password" id="registerPassword" placeholder="Password" required />
@@ -45,11 +45,11 @@
 
       <!-- Login -->
       <div id="loginForm" class="form">
-        <h2>Welcome Back</h2>
+        <h2>Welcome Back, Vol!</h2>
         <input type="email" id="loginEmail" placeholder="Email" required />
         <input type="password" id="loginPassword" placeholder="Password" required />
         <button onclick="login()">Sign In</button>
-        <p>Don't have an account?
+        <p>Don’t have an account?
           <a href="#" onclick="toggleForm('register')">Register here</a>
         </p>
       </div>
@@ -58,12 +58,12 @@
     <!-- ===== WELCOME ===== -->
     <section id="welcome" class="hidden card">
       <h2 id="welcomeMessage"></h2>
-      <button id="demoBtn" onclick="viewDemoData()">Show Demo Posts</button>
+      <button id="demoBtn" onclick="viewDemoData()">Show Vols Demo Posts</button>
     </section>
 
     <!-- ===== FORUM ===== -->
     <section id="forum" class="hidden">
-      <h2>Forum Dashboard</h2>
+      <h2>Vols Forum Dashboard</h2>
 
       <!-- 🧱 LAYOUT WRAPPER -->
       <div id="forumWrapper">
@@ -73,11 +73,12 @@
           <h3>Categories</h3>
           <nav id="categoriesList" class="categories">
             <button class="category-btn active" onclick="filterByCategory('All')">All</button>
-            <button class="category-btn" onclick="filterByCategory('General')">General</button>
-            <button class="category-btn" onclick="filterByCategory('Tech')">Tech</button>
-            <button class="category-btn" onclick="filterByCategory('Gaming')">Gaming</button>
-            <button class="category-btn" onclick="filterByCategory('Education')">Education</button>
-            <button class="category-btn" onclick="filterByCategory('Misc')">Misc</button>
+            <button class="category-btn" onclick="filterByCategory('Game Day Talk')">Game Day Talk</button>
+            <button class="category-btn" onclick="filterByCategory('Players & Recruiting')">Players & Recruiting</button>
+            <button class="category-btn" onclick="filterByCategory('Stats & Analysis')">Stats & Analysis</button>
+            <button class="category-btn" onclick="filterByCategory('Vols History')">Vols History</button>
+            <button class="category-btn" onclick="filterByCategory('SEC Rivalries')">SEC Rivalries</button>
+            <button class="category-btn" onclick="filterByCategory('Fan Zone')">Fan Zone</button>
           </nav>
         </aside>
 
@@ -87,14 +88,15 @@
           <div id="createPost" class="hidden card">
             <h3>Create a New Post</h3>
             <input type="text" id="postTitle" placeholder="Post title" required />
-            <textarea id="postContent" placeholder="Write something interesting..." required></textarea>
+            <textarea id="postContent" placeholder="Talk some Tennessee football..." required></textarea>
 
             <select id="postCategory" aria-label="Select category">
-              <option value="General">General</option>
-              <option value="Tech">Tech</option>
-              <option value="Gaming">Gaming</option>
-              <option value="Education">Education</option>
-              <option value="Misc">Misc</option>
+              <option value="Game Day Talk">Game Day Talk</option>
+              <option value="Players & Recruiting">Players & Recruiting</option>
+              <option value="Stats & Analysis">Stats & Analysis</option>
+              <option value="Vols History">Vols History</option>
+              <option value="SEC Rivalries">SEC Rivalries</option>
+              <option value="Fan Zone">Fan Zone</option>
             </select>
 
             <button onclick="createPost()">Publish</button>
@@ -103,7 +105,7 @@
           <!-- Posts List / Placeholder -->
           <div id="postsList" class="posts">
             <p class="muted" id="postsPlaceholder">
-              Select a Category to view its questions.
+              Select a Category to view Vols discussions.
             </p>
           </div>
         </section>
@@ -119,7 +121,7 @@
 
   <!-- ===== FOOTER ===== -->
   <footer class="site-footer">
-    <p>Created by <strong>Coleman Snyder</strong> | Project 4 — SE Bootcamp</p>
+    <p>Created by <strong>Coleman Snyder</strong> | Tennessee Vols Football Forum — SE Bootcamp</p>
     <p class="footer-links">
       <a href="https://github.com/csnyder2004" target="_blank" rel="noopener">GitHub</a> ·
       <a href="mailto:csnyder@sebootcamp.com">Contact</a>
@@ -161,7 +163,6 @@
         if (headerUser) headerUser.textContent = name ? `Signed in as ${name}` : "";
         if (userHeader) userHeader.classList.remove("hidden");
 
-        // show back button when logged in
         const backBtn = document.getElementById("backButton");
         if (backBtn) backBtn.classList.remove("hidden");
       });
@@ -171,7 +172,6 @@
         const userHeader = document.getElementById("userHeader");
         if (userHeader) userHeader.classList.add("hidden");
 
-        // hide back button on logout
         const backBtn = document.getElementById("backButton");
         if (backBtn) backBtn.classList.add("hidden");
       });
