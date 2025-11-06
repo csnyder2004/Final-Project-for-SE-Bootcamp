@@ -304,25 +304,6 @@ button:active {
   font-style: italic;
 }
 
-/* 🔙 Back Button */
-.back-btn {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-light);
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  align-self: flex-start;
-  margin-bottom: 10px;
-}
-.back-btn:hover {
-  background: var(--accent);
-  color: var(--bg-dark);
-}
-.back-btn.hidden {
-  display: none;
-}
 
 /* 📱 Responsive */
 @media (max-width: 850px) {
@@ -501,4 +482,30 @@ label .field-error {
   font-weight: 600;
   text-align: center;
   box-shadow: 0 0 12px rgba(255, 183, 0, 0.4);
+}
+/* === Dropdown (Category Select) Styling === */
+#postCategory {
+  background-color: #f8f8f8;   /* Light gray background for contrast */
+  color: #111;                 /* Dark text for readability */
+  border: 1px solid #ccc;      /* Subtle border */
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s ease;
+  appearance: none;            /* Removes browser default arrow styling */
+}
+
+#postCategory:hover {
+  background-color: #f0f0f0;   /* Slight hover feedback */
+}
+
+#postCategory:focus {
+  border-color: #ff7f00;       /* Vols orange accent on focus */
+  box-shadow: 0 0 0 2px rgba(255, 127, 0, 0.2);
+}
+
+#postCategory option {
+  color: #111;                 /* Ensures readable dropdown items */
+  background-color: #fff;      /* White dropdown background */
 }
