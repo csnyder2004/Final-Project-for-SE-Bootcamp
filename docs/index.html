@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🏈 Tennessee Vols Football Forum</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Ensures sidebar scrolls if too many categories */
+    #categorySidebar .categories {
+      max-height: 70vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    #postsPlaceholder {
+      text-align: center;
+      font-style: italic;
+      color: #666;
+      padding: 20px;
+    }
+  </style>
 </head>
 
 <body>
@@ -12,7 +26,9 @@
   <header class="site-header">
     <div class="header-left">
       <h1 id="appTitle">🏈 Tennessee Vols Football Forum</h1>
-      <p class="subtitle">Where Vol Nation unites to talk game day, recruiting, and all things orange & white.</p>
+      <p class="subtitle">
+        Where Vol Nation unites to talk game day, recruiting, and all things orange & white.
+      </p>
     </div>
 
     <!-- Shown after login -->
@@ -106,7 +122,7 @@
           <!-- Posts List -->
           <div id="postsList" class="posts">
             <p class="muted" id="postsPlaceholder">
-              Select a Category to view Vols discussions.
+              Select a Category to view its questions.
             </p>
           </div>
         </section>
@@ -158,21 +174,9 @@
   </div>
 
   <!-- ===== SCRIPTS ===== -->
-  <!-- Pre-auth bootstrap -->
-  <script>
-    (function () {
-      try {
-        if (localStorage.getItem("token")) {
-          document.body.classList.add("authed");
-        }
-      } catch (e) {}
-    })();
-  </script>
-
-  <!-- App logic -->
   <script src="app.js"></script>
 
-  <!-- Sync header and authed state -->
+  <!-- Sync authed state and header -->
   <script>
     (function () {
       const wrap = (name, before) => {
@@ -185,6 +189,7 @@
         }
       };
 
+      // Show username and header on login
       wrap("showWelcome", () => {
         document.body.classList.add("authed");
         const name = localStorage.getItem("username") || "";
@@ -194,6 +199,7 @@
         if (userHeader) userHeader.classList.remove("hidden");
       });
 
+      // Hide header on logout
       wrap("logout", () => {
         document.body.classList.remove("authed");
         const userHeader = document.getElementById("userHeader");
