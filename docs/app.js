@@ -3,24 +3,28 @@ const API_URL = "https://project4-forum-backend.onrender.com/api";
 
 /* =========================================================
    🚀 Render Free-Tier Wake-Up Handler (improved)
-   ========================================================= */
+========================================================= */
 async function fetchWithWake(url, options = {}, retries = 6) {
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
   try {
     const res = await fetch(url, options);
     if (res.ok) return res;
 
     // Server might still be booting — retry with gentle warning
     if (res.status >= 500 && retries > 0) {
-      if (retries === 6) showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
-      await delay(10000);
+      if (retries === 6) {
+        showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
+      }
+      await delay(10000); // wait 10s, then retry
       return fetchWithWake(url, options, retries - 1);
     }
     return res;
   } catch (err) {
+    // Network failure (Render still starting up)
     if (retries > 0) {
-      if (retries === 6) showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
+      if (retries === 6) {
+        showAlert("🚀 Server is waking up... please wait 30–60 seconds.", "warning");
+      }
       await delay(10000);
       return fetchWithWake(url, options, retries - 1);
     } else {
@@ -32,11 +36,13 @@ async function fetchWithWake(url, options = {}, retries = 6) {
 }
 
 /* =========================================================
-   Inline errors, password strength meter, alerts
-   ========================================================= */
+   Small helpers for inline field errors & strength meter
+========================================================= */
 function ensureErrorEl(inputEl) {
   if (!inputEl) return null;
-  if (!inputEl.parentElement.style.position) inputEl.parentElement.style.position = "relative";
+  if (!inputEl.parentElement.style.position) {
+    inputEl.parentElement.style.position = "relative";
+  }
   let err = inputEl.parentElement.querySelector(".field-error");
   if (!err) {
     err = document.createElement("span");
@@ -48,6 +54,7 @@ function ensureErrorEl(inputEl) {
       transform: "translateY(-50%)",
       color: "#ef4444",
       fontSize: "0.875rem",
+      paddingLeft: "8px",
       whiteSpace: "nowrap",
       pointerEvents: "none",
     });
@@ -55,24 +62,27 @@ function ensureErrorEl(inputEl) {
   }
   return err;
 }
-function showFieldError(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const err = ensureErrorEl(el);
+
+function showFieldError(inputId, msg) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const err = ensureErrorEl(input);
   if (err) err.textContent = msg || "";
-  el.setAttribute("aria-invalid", "true");
-  el.style.borderColor = "#ef4444";
+  input.setAttribute("aria-invalid", "true");
+  input.style.borderColor = "#ef4444";
 }
-function clearFieldError(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const err = el.parentElement?.querySelector(".field-error");
+
+function clearFieldError(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const err = input.parentElement?.querySelector?.(".field-error");
   if (err) err.textContent = "";
-  el.removeAttribute("aria-invalid");
-  el.style.borderColor = "";
+  input.removeAttribute("aria-invalid");
+  input.style.borderColor = "";
 }
-function setCheckboxError(id, msg) {
-  const cb = document.getElementById(id);
+
+function setCheckboxError(checkboxId, msg) {
+  const cb = document.getElementById(checkboxId);
   if (!cb) return;
   const container = cb.closest("label") || cb.parentElement;
   if (container) {
@@ -94,8 +104,9 @@ function setCheckboxError(id, msg) {
   }
   err.textContent = msg || "";
 }
-function clearCheckboxError(id) {
-  const cb = document.getElementById(id);
+
+function clearCheckboxError(checkboxId) {
+  const cb = document.getElementById(checkboxId);
   if (!cb) return;
   const container = cb.closest("label") || cb.parentElement;
   if (!container) return;
@@ -105,6 +116,9 @@ function clearCheckboxError(id) {
   container.style.outlineOffset = "";
 }
 
+/* ================================ 
+   Password strength (simple)
+================================ */
 function passwordStrengthScore(pw) {
   let score = 0;
   if (pw.length >= 6) score++;
@@ -114,6 +128,7 @@ function passwordStrengthScore(pw) {
   if (/[^A-Za-z0-9]/.test(pw)) score++;
   return Math.min(score, 4);
 }
+
 function ensureStrengthEl() {
   let el = document.getElementById("passwordStrength");
   if (!el) {
@@ -121,11 +136,16 @@ function ensureStrengthEl() {
     if (!pwd) return null;
     el = document.createElement("div");
     el.id = "passwordStrength";
-    Object.assign(el.style, { fontSize: "0.875rem", marginTop: "4px", textAlign: "right" });
+    Object.assign(el.style, {
+      fontSize: "0.875rem",
+      marginTop: "4px",
+      textAlign: "right",
+    });
     pwd.parentElement.appendChild(el);
   }
   return el;
 }
+
 function renderStrength(pw) {
   const el = ensureStrengthEl();
   if (!el) return;
@@ -136,6 +156,9 @@ function renderStrength(pw) {
   el.style.color = colors[score];
 }
 
+/* =========================================================
+   Alerts (with new 'warning' style)
+========================================================= */
 function showAlert(message, type = "success") {
   let alertBox = document.getElementById("alertBox");
   if (!alertBox) {
@@ -152,44 +175,70 @@ function showAlert(message, type = "success") {
 
 /* =========================================================
    Form toggling
-   ========================================================= */
+========================================================= */
 function toggleForm(type) {
-  const reg = document.getElementById("registerForm");
-  const log = document.getElementById("loginForm");
-  reg.classList.toggle("active", type === "register");
-  log.classList.toggle("active", type === "login");
-  const focusField = type === "register" ? document.getElementById("registerUsername") : document.getElementById("loginEmail");
+  const registerForm = document.getElementById("registerForm");
+  const loginForm = document.getElementById("loginForm");
+  registerForm.classList.toggle("active", type === "register");
+  loginForm.classList.toggle("active", type === "login");
+  const focusField =
+    type === "register"
+      ? document.getElementById("registerUsername")
+      : document.getElementById("loginEmail");
   if (focusField) focusField.focus();
 }
 
 /* =========================================================
    Register
-   ========================================================= */
+========================================================= */
 async function register() {
-  const username = document.getElementById("registerUsername").value.trim();
-  const email = document.getElementById("registerEmail").value.trim();
-  const password = document.getElementById("registerPassword").value.trim();
-  const confirm = document.getElementById("confirmPassword").value.trim();
+  const username = (document.getElementById("registerUsername")?.value || "").trim();
+  const email = (document.getElementById("registerEmail")?.value || "").trim();
+  const password = (document.getElementById("registerPassword")?.value || "").trim();
+  const confirm = (document.getElementById("confirmPassword")?.value || "").trim();
   const terms = document.getElementById("registerTerms");
 
   ["registerUsername", "registerEmail", "registerPassword", "confirmPassword"].forEach(clearFieldError);
   if (terms) clearCheckboxError("registerTerms");
 
   let hasError = false;
-  if (!username) { showFieldError("registerUsername", "Required"); hasError = true; }
-  else if (username.length < 3) { showFieldError("registerUsername", "Min 3 characters"); hasError = true; }
+  if (!username) {
+    showFieldError("registerUsername", "Required");
+    hasError = true;
+  } else if (username.length < 3) {
+    showFieldError("registerUsername", "Min 3 characters");
+    hasError = true;
+  }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) { showFieldError("registerEmail", "Required"); hasError = true; }
-  else if (!emailRegex.test(email)) { showFieldError("registerEmail", "Invalid email"); hasError = true; }
+  if (!email) {
+    showFieldError("registerEmail", "Required");
+    hasError = true;
+  } else if (!emailRegex.test(email)) {
+    showFieldError("registerEmail", "Invalid email");
+    hasError = true;
+  }
 
-  if (!password) { showFieldError("registerPassword", "Required"); hasError = true; }
-  else if (password.length < 6) { showFieldError("registerPassword", "Min 6 characters"); hasError = true; }
+  if (!password) {
+    showFieldError("registerPassword", "Required");
+    hasError = true;
+  } else if (password.length < 6) {
+    showFieldError("registerPassword", "Min 6 characters");
+    hasError = true;
+  }
 
-  if (!confirm) { showFieldError("confirmPassword", "Required"); hasError = true; }
-  else if (password !== confirm) { showFieldError("confirmPassword", "Does not match"); hasError = true; }
+  if (!confirm) {
+    showFieldError("confirmPassword", "Required");
+    hasError = true;
+  } else if (password !== confirm) {
+    showFieldError("confirmPassword", "Does not match");
+    hasError = true;
+  }
 
-  if (terms && !terms.checked) { setCheckboxError("registerTerms", "Please accept"); hasError = true; }
+  if (terms && !terms.checked) {
+    setCheckboxError("registerTerms", "Please accept");
+    hasError = true;
+  }
 
   if (hasError) return showAlert("Please fix the highlighted fields.", "error");
 
@@ -199,18 +248,19 @@ async function register() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),
     });
-    const data = await res.json();
 
+    const data = await res.json();
     if (!res.ok) {
-      const msg = data?.message || "Registration failed.";
-      if (msg.toLowerCase().includes("email")) showFieldError("registerEmail", "Already registered");
-      if (msg.toLowerCase().includes("username")) showFieldError("registerUsername", "Already taken");
+      const msg = (data && data.message) || "Registration failed.";
+      const lower = msg.toLowerCase();
+      if (lower.includes("email")) showFieldError("registerEmail", "Already registered");
+      if (lower.includes("username")) showFieldError("registerUsername", "Already taken");
       showAlert(msg, "error");
       return;
     }
 
     showAlert("Registration successful! Please log in.", "success");
-    setTimeout(() => toggleForm("login"), 400);
+    toggleForm("login");
   } catch (err) {
     console.error("💥 Registration error:", err);
     showAlert("Unable to reach server. Try again later.", "error");
@@ -218,14 +268,23 @@ async function register() {
 }
 
 /* =========================================================
-   Login (fixed: ensures token before load)
-   ========================================================= */
+   Login
+========================================================= */
 async function login() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-
+  const email = (document.getElementById("loginEmail")?.value || "").trim();
+  const password = (document.getElementById("loginPassword")?.value || "").trim();
   ["loginEmail", "loginPassword"].forEach(clearFieldError);
-  if (!email || !password) return showAlert("Please enter both email and password.", "error");
+
+  let hasError = false;
+  if (!email) {
+    showFieldError("loginEmail", "Required");
+    hasError = true;
+  }
+  if (!password) {
+    showFieldError("loginPassword", "Required");
+    hasError = true;
+  }
+  if (hasError) return showAlert("Please enter both email and password.", "error");
 
   try {
     const res = await fetchWithWake(`${API_URL}/auth/login`, {
@@ -233,25 +292,20 @@ async function login() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
 
+    const data = await res.json();
     if (!res.ok) {
-      const msg = data?.message || "Login failed.";
+      const msg = (data && data.message) || "Login failed.";
       if (msg.toLowerCase().includes("password")) showFieldError("loginPassword", "Incorrect");
       if (msg.toLowerCase().includes("email")) showFieldError("loginEmail", "Not found");
       showAlert(msg, "error");
       return;
     }
 
-    // ✅ Ensure token is saved before loading data
     localStorage.setItem("token", data.token);
     localStorage.setItem("username", data.user.username);
-
+    showWelcome();
     showAlert(`Welcome back, ${data.user.username}!`, "success");
-    setTimeout(() => {
-      showWelcome();
-      loadPosts("All");
-    }, 300);
   } catch (err) {
     console.error("💥 Login error:", err);
     showAlert("Unable to connect to server. Try again later.", "error");
@@ -260,7 +314,7 @@ async function login() {
 
 /* =========================================================
    Section visibility
-   ========================================================= */
+========================================================= */
 function showWelcome() {
   document.body.classList.add("authed");
   document.getElementById("auth-forms").classList.add("hidden");
@@ -277,6 +331,8 @@ function showWelcome() {
     demoBtn.textContent = demoLoaded ? "Hide Demo Data" : "View Demo Data";
     demoBtn.disabled = false;
   }
+
+  loadPosts();
 }
 
 function logout() {
@@ -287,19 +343,34 @@ function logout() {
   document.getElementById("forum").classList.add("hidden");
   toggleForm("login");
   showAlert("You’ve been signed out.", "success");
+
+  const demoBtn = document.getElementById("demoBtn");
+  if (demoBtn) {
+    demoBtn.textContent = "View Demo Data";
+    demoBtn.disabled = false;
+  }
 }
 
 /* =========================================================
    Auto-login on load
-   ========================================================= */
+========================================================= */
 window.onload = () => {
-  ["registerUsername", "registerEmail", "registerPassword", "confirmPassword", "loginEmail", "loginPassword"].forEach((id) => {
+  const attach = (id, evt = "input", fn = () => clearFieldError(id)) => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener("input", () => clearFieldError(id));
-  });
+    if (el) el.addEventListener(evt, fn);
+  };
+  ["registerUsername", "registerEmail", "registerPassword", "confirmPassword", "loginEmail", "loginPassword"].forEach((id) =>
+    attach(id)
+  );
 
   const pwd = document.getElementById("registerPassword");
   if (pwd) pwd.addEventListener("input", () => renderStrength(pwd.value));
+
+  const conf = document.getElementById("confirmPassword");
+  if (conf) {
+    conf.addEventListener("input", () => clearFieldError("confirmPassword"));
+    if (pwd) pwd.addEventListener("input", () => clearFieldError("confirmPassword"));
+  }
 
   const terms = document.getElementById("registerTerms");
   if (terms) terms.addEventListener("change", () => clearCheckboxError("registerTerms"));
@@ -307,155 +378,3 @@ window.onload = () => {
   if (localStorage.getItem("token")) showWelcome();
   else toggleForm("register");
 };
-
-/* =========================================================
-   Posts loading & demo toggle
-   ========================================================= */
-async function loadPosts(category = "All", hideDemos = false) {
-  const loading = document.getElementById("loading");
-  const postsList = document.getElementById("postsList");
-  const placeholder = document.getElementById("postsPlaceholder");
-
-  loading.classList.remove("hidden");
-  postsList.innerHTML = "";
-
-  try {
-    const res = await fetchWithWake(`${API_URL}/posts`);
-    const data = await res.json();
-    loading.classList.add("hidden");
-
-    if (!res.ok) {
-      showAlert(data.message || "Failed to load posts.", "error");
-      return;
-    }
-
-    let filteredPosts = category === "All" ? data : data.filter((p) => p.category === category);
-    if (hideDemos)
-      filteredPosts = filteredPosts.filter((p) => !["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(p.author?.username));
-
-    filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    if (category === "All" && filteredPosts.length === 0) {
-      placeholder.classList.remove("hidden");
-      placeholder.textContent = "Select a Category to view its questions.";
-      return;
-    }
-    if (filteredPosts.length === 0) {
-      placeholder.classList.remove("hidden");
-      placeholder.textContent = "No posts found in this category yet.";
-      return;
-    }
-    placeholder.classList.add("hidden");
-
-    postsList.innerHTML = "";
-    filteredPosts.forEach((p) => {
-      const div = document.createElement("div");
-      div.className = "post";
-      if (["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(p.author?.username)) div.classList.add("demo-post");
-      div.innerHTML = `
-        <h3>${p.title}</h3>
-        <p>${p.content}</p>
-        <small><strong>${p.category || "General"}</strong> | By ${p.author?.username || "Unknown"} on ${new Date(p.createdAt).toLocaleString()}</small>
-      `;
-      postsList.appendChild(div);
-    });
-  } catch (error) {
-    loading.classList.add("hidden");
-    console.error(error);
-    showAlert("Failed to load posts. Check console.", "error");
-  }
-}
-
-async function createPost() {
-  const token = localStorage.getItem("token");
-  const title = document.getElementById("postTitle").value.trim();
-  const content = document.getElementById("postContent").value.trim();
-  const category = document.getElementById("postCategory").value;
-
-  if (!title) return showFieldError("postTitle", "Required");
-  if (!content) return showFieldError("postContent", "Required");
-
-  try {
-    const res = await fetchWithWake(`${API_URL}/posts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ title, content, category }),
-    });
-    const data = await res.json();
-    showAlert(data.message, res.ok ? "success" : "error");
-    if (res.ok) {
-      document.getElementById("postTitle").value = "";
-      document.getElementById("postContent").value = "";
-      loadPosts();
-    }
-  } catch {
-    showAlert("Unable to create post. Please try again later.", "error");
-  }
-}
-
-function filterByCategory(category) {
-  document.querySelectorAll(".category-btn").forEach((b) => b.classList.remove("active"));
-  const idx = ["All", "Game Day Talk", "Players & Recruiting", "Stats & Analysis", "Vols History", "SEC Rivalries", "Fan Zone"].indexOf(category) + 1;
-  const btn = document.querySelector(`.category-btn:nth-child(${idx})`);
-  if (btn) btn.classList.add("active");
-  loadPosts(category);
-}
-
-/* =========================================================
-   Demo data loader & heartbeat
-   ========================================================= */
-async function viewDemoData() {
-  const demoBtn = document.getElementById("demoBtn");
-  const demoLoaded = localStorage.getItem("demoLoaded") === "true";
-  if (demoLoaded) {
-    localStorage.removeItem("demoLoaded");
-    if (demoBtn) demoBtn.textContent = "View Demo Data";
-    showAlert("Demo data hidden.", "success");
-    await loadPosts("All", true);
-    return;
-  }
-  try {
-    showAlert("Checking for Vols demo data...", "success");
-    const res = await fetchWithWake(`${API_URL}/seed/demo`, { method: "POST" });
-    const data = await res.json();
-    if (res.ok) {
-      localStorage.setItem("demoLoaded", "true");
-      if (demoBtn) demoBtn.textContent = "Hide Demo Data";
-      showAlert(data.message || "Vols demo data loaded!", "success");
-      await loadPosts();
-    } else showAlert(data.message || "Failed to load demo data.", "error");
-  } catch {
-    showAlert("Failed to connect to server.", "error");
-  }
-}
-
-setInterval(async () => {
-  try {
-    await fetch(`${API_URL}/posts`, { method: "GET" });
-    console.log("💓 Pinged backend to keep it awake");
-  } catch {
-    console.warn("⚠️ Backend ping failed (server may be restarting)");
-  }
-}, 240000);
-
-/* =========================================================
-   📜 Terms Modal
-   ========================================================= */
-window.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("termsModal");
-  const backdrop = document.getElementById("termsBackdrop");
-  const closeBtn = document.getElementById("closeTermsBtn");
-  const acceptBtn = document.getElementById("acceptTermsBtn");
-  const openLink = document.getElementById("openTermsLink");
-  const checkbox = document.getElementById("registerTerms");
-  if (!modal || !openLink) return;
-
-  function openTerms(e) { e.preventDefault(); modal.classList.remove("hidden"); closeBtn?.focus(); }
-  function closeTerms() { modal.classList.add("hidden"); }
-
-  openLink.addEventListener("click", openTerms);
-  backdrop?.addEventListener("click", closeTerms);
-  closeBtn?.addEventListener("click", closeTerms);
-  document.addEventListener("keydown", (e) => e.key === "Escape" && !modal.classList.contains("hidden") && closeTerms());
-  acceptBtn?.addEventListener("click", () => { if (checkbox) checkbox.checked = true; clearCheckboxError("registerTerms"); closeTerms(); });
-});
