@@ -147,24 +147,33 @@ async function loadPosts(category = "All", hideDemos = false) {
       return;
     }
 
+    // ✅ Filter by category
     let filteredPosts =
       category === "All" ? posts : posts.filter((p) => p.category === category);
 
-    // 🔸 NEW: hide demo posts if flag is true
+    // ✅ Hide demo posts when requested (no email needed)
     if (hideDemos) {
       filteredPosts = filteredPosts.filter(
-        (p) => !(p.author?.email?.includes("@volsforum.com"))
+        (p) =>
+          !["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(
+            p.author?.username
+          )
       );
     }
 
+    // ✅ Render posts
     postsList.innerHTML = "";
     filteredPosts.forEach((p) => {
       const div = document.createElement("div");
       div.className = "post";
 
-      // 🔸 visually tag demo posts
-      const isDemo = p.author?.email?.includes("@volsforum.com");
-      if (isDemo) div.classList.add("demo-post");
+      // Highlight demo posts
+      if (
+        ["SmokeyTheDog", "NeylandLegend", "RockyTopFan"].includes(
+          p.author?.username
+        )
+      )
+        div.classList.add("demo-post");
 
       div.innerHTML = `
         <h3>${p.title}</h3>
@@ -246,6 +255,7 @@ async function viewDemoData() {
   const demoBtn = document.getElementById("demoBtn");
   const demoLoaded = localStorage.getItem("demoLoaded") === "true";
 
+  // Hide demo posts
   if (demoLoaded) {
     localStorage.removeItem("demoLoaded");
     demoBtn.textContent = "View Demo Data";
@@ -254,6 +264,7 @@ async function viewDemoData() {
     return;
   }
 
+  // Load demo data
   try {
     showAlert("Loading Vols demo data...", "success");
     const res = await fetch(`${API_URL}/seed/demo`, { method: "POST" });
