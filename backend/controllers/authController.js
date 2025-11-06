@@ -3,31 +3,51 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 /**
- * 🧩 REGISTER USER
- * Validates input, hashes password, and creates new user.
+ * 🧱 REGISTER USER
+ * Validates input, checks duplicates, hashes password, creates user.
  */
 export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // --- 1️⃣ Validate inputs ---
+    // --- 1️⃣ Validate input ---
     if (!username || !email || !password)
       return res.status(400).json({ message: "Please fill out all fields." });
 
-    if (username.length < 3)
-      return res.status(400).json({ message: "Username must be at least 3 characters long." });
+    if (username.trim().length < 3)
+      return res.status(400).json({
+        message: "Username must be at least 3 characters long.",
+      });
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email))
       return res.status(400).json({ message: "Please enter a valid email address." });
 
     if (password.length < 6)
-      return res.status(400).json({ message: "Password must be at least 6 characters long." });
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long.",
+      });
 
-    // --- 2️⃣ Check duplicates ---
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existingUser)
-      return res.status(400).json({ message: "That email address is already registered." });
+    // --- 2️⃣ Check duplicates (both email and username) ---
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email.toLowerCase().trim() },
+        { username: username.trim() },
+      ],
+    });
+
+    if (existingUser) {
+      if (existingUser.email === email.toLowerCase().trim()) {
+        return res.status(400).json({
+          message: "That email address is already registered.",
+        });
+      }
+      if (existingUser.username === username.trim()) {
+        return res.status(400).json({
+          message: "That username is already taken.",
+        });
+      }
+    }
 
     // --- 3️⃣ Hash password ---
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -59,7 +79,7 @@ export const registerUser = async (req, res) => {
 
 /**
  * 🔐 LOGIN USER
- * Checks credentials and returns JWT.
+ * Verifies credentials and returns JWT token.
  */
 export const loginUser = async (req, res) => {
   try {
@@ -67,26 +87,32 @@ export const loginUser = async (req, res) => {
 
     // --- 1️⃣ Validate input ---
     if (!email || !password)
-      return res.status(400).json({ message: "Please enter both email and password." });
+      return res.status(400).json({
+        message: "Please enter both email and password.",
+      });
 
-    // --- 2️⃣ Look up user and include password field ---
+    // --- 2️⃣ Find user by email ---
     const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+password");
     if (!user)
-      return res.status(400).json({ message: "No account found with that email address." });
+      return res.status(400).json({
+        message: "Invalid email or password.",
+      });
 
-    // --- 3️⃣ Compare password hashes ---
+    // --- 3️⃣ Check password match ---
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(400).json({ message: "Incorrect password. Please try again." });
+      return res.status(400).json({
+        message: "Invalid email or password.",
+      });
 
-    // --- 4️⃣ Create JWT ---
+    // --- 4️⃣ Generate JWT ---
     const token = jwt.sign(
       { id: user._id, username: user.username },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    console.log(`✅ ${user.username} logged in successfully`);
+    console.log(`🔑 ${user.username} logged in successfully.`);
 
     return res.status(200).json({
       message: "✅ Login successful!",
@@ -106,10 +132,13 @@ export const loginUser = async (req, res) => {
 };
 
 /**
- * 🧾 VERIFY TOKEN / GET USER INFO
+ * 🧩 VERIFY LOGGED-IN USER (Protected Route)
  */
 export const verifyUser = async (req, res) => {
   try {
+    if (!req.user)
+      return res.status(401).json({ message: "Unauthorized: No user found in token." });
+
     res.status(200).json({
       message: "🔒 Token verified successfully.",
       user: req.user,

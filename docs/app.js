@@ -23,9 +23,26 @@ async function register() {
   const username = document.getElementById("registerUsername").value.trim();
   const email = document.getElementById("registerEmail").value.trim();
   const password = document.getElementById("registerPassword").value.trim();
+  const confirm = document.getElementById("confirmPassword")
+    ? document.getElementById("confirmPassword").value.trim()
+    : "";
 
-  if (!username || !email || !password)
+  // 🧠 Basic validation
+  if (!username || !email || !password || !confirm)
     return showAlert("Please fill in all fields.", "error");
+
+  // ✉️ Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email))
+    return showAlert("Please enter a valid email address.", "error");
+
+  // 🔑 Password match check
+  if (password !== confirm)
+    return showAlert("Passwords do not match. Please retype.", "error");
+
+  // 🔒 Password strength
+  if (password.length < 6)
+    return showAlert("Password must be at least 6 characters long.", "error");
 
   try {
     const res = await fetch(`${API_URL}/auth/register`, {
@@ -35,11 +52,22 @@ async function register() {
     });
 
     const data = await res.json();
-    showAlert(data.message, res.ok ? "success" : "error");
 
-    if (res.ok) toggleForm("login");
-  } catch {
-    showAlert("Network error: unable to register.", "error");
+    if (!res.ok) {
+      // Handle specific errors
+      if (data.message?.toLowerCase().includes("email"))
+        return showAlert("That email is already registered.", "error");
+      if (data.message?.toLowerCase().includes("username"))
+        return showAlert("That username is already taken.", "error");
+
+      return showAlert(data.message || "Registration failed.", "error");
+    }
+
+    showAlert("Registration successful! Please log in.", "success");
+    toggleForm("login");
+  } catch (err) {
+    console.error("💥 Registration error:", err);
+    showAlert("Unable to reach server. Try again later.", "error");
   }
 }
 
@@ -49,7 +77,7 @@ async function login() {
   const password = document.getElementById("loginPassword").value.trim();
 
   if (!email || !password)
-    return showAlert("Please fill in all fields.", "error");
+    return showAlert("Please enter both email and password.", "error");
 
   try {
     const res = await fetch(`${API_URL}/auth/login`, {
@@ -59,14 +87,21 @@ async function login() {
     });
 
     const data = await res.json();
-    if (!res.ok)
-      return showAlert(data.message || "Invalid credentials.", "error");
+
+    if (!res.ok) {
+      if (data.message?.toLowerCase().includes("invalid"))
+        return showAlert("Incorrect email or password.", "error");
+
+      return showAlert(data.message || "Login failed.", "error");
+    }
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("username", data.user.username);
     showWelcome();
-  } catch {
-    showAlert("Network error: unable to connect to server.", "error");
+    showAlert(`Welcome back, ${data.user.username}!`, "success");
+  } catch (err) {
+    console.error("💥 Login error:", err);
+    showAlert("Unable to connect to server. Try again later.", "error");
   }
 }
 
@@ -253,7 +288,6 @@ async function viewDemoData() {
   const demoLoaded = localStorage.getItem("demoLoaded") === "true";
 
   if (demoLoaded) {
-    // 🔸 Hide demo posts
     localStorage.removeItem("demoLoaded");
     demoBtn.textContent = "View Demo Data";
     showAlert("Demo data hidden.", "success");
@@ -262,7 +296,6 @@ async function viewDemoData() {
   }
 
   try {
-    // 🔸 Show demo posts (seed if not already)
     showAlert("Checking for Vols demo data...", "success");
     const res = await fetch(`${API_URL}/seed/demo`, { method: "POST" });
     const data = await res.json();
@@ -314,5 +347,5 @@ function showAlert(message, type = "success") {
   alertBox.classList.remove("error", "success", "show");
   alertBox.classList.add(type, "show");
 
-  setTimeout(() => alertBox.classList.remove("show"), 3000);
+  setTimeout(() => alertBox.classList.remove("show"), 3500);
 }
