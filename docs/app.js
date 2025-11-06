@@ -82,6 +82,17 @@ function showWelcome() {
   const username = localStorage.getItem("username");
   document.getElementById("welcomeMessage").innerText = `Welcome, ${username}!`;
 
+  // Restore demo button state
+  const demoBtn = document.getElementById("demoBtn");
+  const demoLoaded = localStorage.getItem("demoLoaded") === "true";
+  if (demoLoaded && demoBtn) {
+    demoBtn.textContent = "Hide Demo Data";
+    demoBtn.disabled = false;
+  } else if (demoBtn) {
+    demoBtn.textContent = "View Demo Data";
+    demoBtn.disabled = false;
+  }
+
   updateBackButton("forum");
   loadPosts();
 }
@@ -95,6 +106,13 @@ function logout() {
   toggleForm("login");
   updateBackButton("auth");
   showAlert("You’ve been signed out.", "success");
+
+  // Reset demo button
+  const demoBtn = document.getElementById("demoBtn");
+  if (demoBtn) {
+    demoBtn.textContent = "View Demo Data";
+    demoBtn.disabled = false;
+  }
 }
 
 // ========== AUTO-LOGIN ON PAGE LOAD ==========
@@ -216,8 +234,22 @@ function filterByCategory(category) {
   loadPosts(category);
 }
 
-// ========== VIEW DEMO DATA ==========
+// ========== VIEW / HIDE DEMO DATA ==========
 async function viewDemoData() {
+  const demoBtn = document.getElementById("demoBtn");
+  const demoLoaded = localStorage.getItem("demoLoaded") === "true";
+
+  // 👇 If already loaded, hide demo posts visually
+  if (demoLoaded) {
+    const postsList = document.getElementById("postsList");
+    postsList.innerHTML = `<p class="muted">Demo data hidden. Click again to show it.</p>`;
+    localStorage.removeItem("demoLoaded");
+    demoBtn.textContent = "View Demo Data";
+    showAlert("Demo data hidden.", "success");
+    return;
+  }
+
+  // 👇 Otherwise, load demo data from server
   try {
     showAlert("Loading demo data...", "success");
     const res = await fetch(`${API_URL}/seed/demo`, { method: "POST" });
@@ -226,11 +258,8 @@ async function viewDemoData() {
     if (res.ok) {
       showAlert(data.message || "Demo data loaded!", "success");
       localStorage.setItem("demoLoaded", "true");
-      const demoBtn = document.getElementById("demoBtn");
-      if (demoBtn) {
-        demoBtn.textContent = "Demo Data Loaded ✅";
-        demoBtn.disabled = true;
-      }
+      demoBtn.textContent = "Hide Demo Data";
+      demoBtn.disabled = false;
       loadPosts();
     } else {
       showAlert(data.message || "Failed to load demo data.", "error");

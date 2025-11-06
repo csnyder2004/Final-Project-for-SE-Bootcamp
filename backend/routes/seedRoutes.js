@@ -7,68 +7,95 @@ const router = express.Router();
 
 /**
  * POST /api/seed/demo
- * Creates demo users and posts if not already present.
- * Safe for repeated use. Public, no password needed.
+ * Seeds Vols Football–themed demo users and posts.
+ * Safe for repeated use (will not duplicate if already exists).
  */
 router.post("/demo", async (_req, res) => {
   try {
-    const existingUsers = await User.find({ email: /@example\.com$/ });
+    const existingUsers = await User.find({ email: /@volsforum\.com$/ });
     const existingPosts = await Post.find({});
 
+    // If demo data already exists, return it safely
     if (existingUsers.length > 0 && existingPosts.length > 0) {
       return res.json({
-        message: "Demo data already loaded!",
+        message: "🏈 Vols demo data already loaded!",
         demoAccounts: [
-          { email: "coleman@example.com", password: "password123" },
-          { email: "alex@example.com", password: "password123" },
-          { email: "jordan@example.com", password: "password123" },
+          { email: "smokey@volsforum.com", password: "govols123" },
+          { email: "neyland@volsforum.com", password: "govols123" },
+          { email: "rocky@volsforum.com", password: "govols123" },
         ],
       });
     }
 
-    console.log("🌱 Seeding demo data...");
-    const hashedPass = await bcrypt.hash("password123", 10);
+    console.log("🌱 Seeding Tennessee Vols Football demo data...");
+    const hashedPass = await bcrypt.hash("govols123", 10);
 
+    // Demo users
     const users = await User.insertMany([
-      { username: "coleman", email: "coleman@example.com", password: hashedPass },
-      { username: "alex", email: "alex@example.com", password: hashedPass },
-      { username: "jordan", email: "jordan@example.com", password: hashedPass },
+      { username: "SmokeyTheDog", email: "smokey@volsforum.com", password: hashedPass },
+      { username: "NeylandLegend", email: "neyland@volsforum.com", password: hashedPass },
+      { username: "RockyTopFan", email: "rocky@volsforum.com", password: hashedPass },
     ]);
 
+    // Demo posts for each category
     await Post.insertMany([
       {
-        title: "Welcome to Project 4 Forum!",
-        content: "This is demo data! Explore posts and try logging in as demo users.",
-        category: "General",
+        title: "🔥 Game Day Thread: Vols vs Alabama!",
+        content:
+          "Who’s ready for the Third Saturday in October? Let’s hear those score predictions and tailgate setups!",
+        category: "Game Day Talk",
         author: users[0]._id,
       },
       {
-        title: "Learning Node.js",
-        content: "Node.js lets you use JavaScript everywhere — frontend and backend!",
-        category: "Education",
+        title: "Recruiting Update: 5⭐ QB visiting Knoxville",
+        content:
+          "Rumor is that a top high school QB will be on campus this weekend. Could be a big get for 2025!",
+        category: "Players & Recruiting",
         author: users[1]._id,
       },
       {
-        title: "Favorite Tech Stack?",
-        content: "I love MERN! What’s your favorite?",
-        category: "Tech",
+        title: "Breaking Down Joe Milton’s 2024 Stats",
+        content:
+          "Let’s talk about completion percentage, yards per attempt, and how the offense looked under pressure.",
+        category: "Stats & Analysis",
+        author: users[2]._id,
+      },
+      {
+        title: "Flashback: 1998 National Championship Season",
+        content:
+          "Take a trip down memory lane — what’s your favorite play from the ‘98 run?",
+        category: "Vols History",
+        author: users[0]._id,
+      },
+      {
+        title: "SEC Rivalries: Which team do you love to hate?",
+        content:
+          "Florida, Alabama, Georgia — who’s the biggest rival in your eyes and why?",
+        category: "SEC Rivalries",
+        author: users[1]._id,
+      },
+      {
+        title: "Vol Fan Zone: Share Your Tailgate Photos!",
+        content:
+          "Let’s see those orange tents, checkerboard dips, and Smokey plushies! #VolNation",
+        category: "Fan Zone",
         author: users[2]._id,
       },
     ]);
 
-    console.log("✅ Demo data seeded successfully!");
+    console.log("✅ Vols Football demo data seeded successfully!");
 
     res.json({
-      message: "✅ Demo data added successfully!",
+      message: "✅ Vols demo data added successfully!",
       demoAccounts: [
-        { email: "coleman@example.com", password: "password123" },
-        { email: "alex@example.com", password: "password123" },
-        { email: "jordan@example.com", password: "password123" },
+        { email: "smokey@volsforum.com", password: "govols123" },
+        { email: "neyland@volsforum.com", password: "govols123" },
+        { email: "rocky@volsforum.com", password: "govols123" },
       ],
     });
   } catch (err) {
     console.error("❌ Demo seeding failed:", err);
-    res.status(500).json({ message: "Server error seeding demo data." });
+    res.status(500).json({ message: "Server error while seeding demo data." });
   }
 });
 

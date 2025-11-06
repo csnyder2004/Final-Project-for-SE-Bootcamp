@@ -4,8 +4,8 @@
   --bg-panel: #1e293b;
   --text-light: #f1f5f9;
   --text-muted: #94a3b8;
-  --accent: #38bdf8;
-  --accent-hover: #0ea5e9;
+  --accent: #ff8200; /* Vols Orange */
+  --accent-hover: #d96e00;
   --error: #ef4444;
   --success: #22c55e;
   --radius: 12px;
@@ -36,19 +36,18 @@ body {
 /* 💬 Header */
 .site-header {
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 25px;
-  text-align: left;
 }
 
 .site-header h1 {
   color: var(--accent);
   font-size: 2.2rem;
-  text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  text-shadow: 0 0 10px rgba(255, 130, 0, 0.3);
 }
 
 .site-header .subtitle {
@@ -61,7 +60,7 @@ body {
 /* 📦 Main Container */
 .container {
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius);
@@ -177,58 +176,85 @@ button:active {
   margin-bottom: 10px;
 }
 
-/* 💬 Forum Section */
-#forum {
-  display: none;
-  background: rgba(255, 255, 255, 0.05);
+/* 🧱 Forum Wrapper Layout */
+#forumWrapper {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* 🧭 Sidebar (Categories) */
+#categorySidebar {
+  background: rgba(255, 255, 255, 0.06);
   border-radius: var(--radius);
-  padding: 24px;
-  animation: fadeIn 0.6s ease;
-}
-
-#forum h2 {
-  color: var(--accent);
-  margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 6px;
-}
-
-/* 📂 Category Buttons */
-.categories {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.category-btn {
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--text-light);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 8px 16px;
-  margin: 5px;
+  padding: 16px;
+  height: 75vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  left: 0;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.3);
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) rgba(255, 255, 255, 0.05);
+}
+
+#categorySidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+#categorySidebar::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 8px;
+}
+
+#categoriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Category Buttons */
+.category-btn {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .category-btn:hover {
   background: var(--accent);
   color: var(--bg-dark);
+  transform: translateX(2px);
 }
 
 .category-btn.active {
   background: var(--accent);
   color: var(--bg-dark);
-  font-weight: bold;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(255, 130, 0, 0.4);
 }
 
-/* ✏️ Create Post Section */
+/* 🧾 Forum Main (Posts + Create) */
+#forumMain {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
 #createPost {
-  margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: var(--radius);
   padding: 16px;
+  margin-bottom: 20px;
 }
 
 #createPost input,
@@ -243,7 +269,7 @@ button:active {
   border-radius: 8px;
 }
 
-/* 🧾 Posts List */
+/* Posts */
 #postsList {
   display: grid;
   gap: 14px;
@@ -254,11 +280,13 @@ button:active {
   border-radius: 8px;
   padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 
 #postsList .post:hover {
   background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(255, 130, 0, 0.3);
 }
 
 #postsList .post h3 {
@@ -276,84 +304,57 @@ button:active {
   font-style: italic;
 }
 
-/* 🔄 Loading Spinner */
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 30px;
-}
-
-.spinner {
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top: 4px solid var(--accent);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  animation: spin 1s linear infinite;
-}
-
 /* 🔙 Back Button */
 .back-btn {
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-light);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  align-self: flex-start;
+  margin-bottom: 10px;
 }
-
 .back-btn:hover {
   background: var(--accent);
   color: var(--bg-dark);
 }
-
 .back-btn.hidden {
   display: none;
 }
 
-/* 🔔 Alert Box */
-.alert-box {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--success);
-  color: white;
-  padding: 12px 18px;
-  border-radius: 8px;
-  font-weight: 500;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: 9999;
-}
-.alert-box.error { background: var(--error); }
-.alert-box.show { opacity: 1; }
-
-/* 🌠 Animations */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 /* 📱 Responsive */
-@media (max-width: 768px) {
+@media (max-width: 850px) {
   #auth-forms {
     grid-template-columns: 1fr;
   }
+
   .container {
     padding: 20px;
   }
-  .site-header h1 {
-    font-size: 1.8rem;
+
+  #forumWrapper {
+    grid-template-columns: 1fr;
   }
-  #forum h2 {
-    font-size: 1.3rem;
+
+  #categorySidebar {
+    position: relative;
+    height: auto;
+    overflow-y: visible;
+    margin-bottom: 20px;
+  }
+
+  #categoriesList {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .category-btn {
+    width: auto;
+    text-align: center;
+    margin: 4px;
   }
 }
 
@@ -372,21 +373,9 @@ button:active {
   text-decoration: underline;
 }
 
-/* 🧩 Fix: Hide and Show Correct Sections When Authenticated */
-.hidden {
-  display: none !important;
-}
-
-/* 👤 When user is authenticated (body.authed added via JS) */
-body.authed #auth-forms {
-  display: none !important;
-}
+/* 🧩 Visibility */
+.hidden { display: none !important; }
+body.authed #auth-forms { display: none !important; }
 body.authed #welcome,
 body.authed #forum,
-body.authed #createPost {
-  display: block !important;
-}
-.demo-post {
-  border-left: 4px solid var(--accent);
-  background: rgba(56, 189, 248, 0.1);
-}
+body.authed #createPost { display: block !important; }
