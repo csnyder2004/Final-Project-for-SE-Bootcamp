@@ -509,3 +509,45 @@ label .field-error {
   color: #111;                 /* Ensures readable dropdown items */
   background-color: #fff;      /* White dropdown background */
 }
+/* ==== Force readable Select (cross-browser) ==== */
+#postCategory,
+#postCategory:focus,
+#postCategory option {
+  background-color: #ffffff !important; /* white menu + field */
+  color: #111 !important;               /* dark text */
+}
+
+/* Keep your orange focus ring */
+#postCategory:focus {
+  border-color: #ff7f00 !important;
+  box-shadow: 0 0 0 2px rgba(255, 127, 0, 0.25) !important;
+}
+
+/* Normalize native styling and use a custom arrow */
+#postCategory {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  color-scheme: light;                  /* Chrome/Safari: use light dropdown menu */
+  border: 1px solid #ccc !important;
+  border-radius: 6px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10' fill='none'><path d='M1 2l6 6 6-6' stroke='%23ff7f00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 10px;
+  padding-right: 2.25rem;              /* room for the arrow */
+}
+
+/* Old Edge / IE value color fallback */
+#postCategory::-ms-value {
+  color: #111;
+  background: #fff;
+}
+
+/* Firefox sometimes ignores option background on dark pages—this helps */
+@-moz-document url-prefix() {
+  #postCategory option {
+    background-color: #ffffff !important;
+    color: #111 !important;
+  }
+}
