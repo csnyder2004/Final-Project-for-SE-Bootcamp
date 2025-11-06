@@ -350,8 +350,9 @@ window.onload = () => {
    Posts loading & demo toggle
    ========================================================= */
 async function loadPosts(category = "All", hideDemos = false) {
-  const loading = document.getElementById("loading");
+   const loading = document.getElementById("loading");
   const postsList = document.getElementById("postsList");
+  const placeholder = document.getElementById("postsPlaceholder");
 
   loading.classList.remove("hidden");
   postsList.innerHTML = "";
@@ -360,10 +361,12 @@ async function loadPosts(category = "All", hideDemos = false) {
     const res = await fetchWithWake(`${API_URL}/posts`);
     const text = await res.text();
     let posts;
+
     try {
       posts = JSON.parse(text);
     } catch {
       showAlert("Server returned invalid data.", "error");
+      loading.classList.add("hidden");
       return;
     }
 
@@ -374,11 +377,7 @@ async function loadPosts(category = "All", hideDemos = false) {
       return;
     }
 
-    if (!Array.isArray(posts) || posts.length === 0) {
-      postsList.innerHTML = `<p class="muted">No posts yet — be the first to start a discussion!</p>`;
-      return;
-    }
-
+    // 🧮 Filter & sort
     let filteredPosts =
       category === "All" ? posts : posts.filter((p) => p.category === category);
 
@@ -389,6 +388,21 @@ async function loadPosts(category = "All", hideDemos = false) {
             p.author?.username
           )
       );
+    }
+
+    filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // 🪧 Placeholder behavior
+    if (!Array.isArray(filteredPosts) || filteredPosts.length === 0) {
+      placeholder.classList.remove("hidden");
+      placeholder.textContent =
+        category === "All"
+          ? "Select a Category to view its questions."
+          : "No posts found in this category yet.";
+      postsList.innerHTML = "";
+      return;
+    } else {
+      placeholder.classList.add("hidden");
     }
 
     postsList.innerHTML = "";
@@ -404,7 +418,9 @@ async function loadPosts(category = "All", hideDemos = false) {
         <p>${p.content}</p>
         <small>
           <strong>${p.category || "General"}</strong> |
-          By ${p.author?.username || "Unknown"} on ${new Date(p.createdAt).toLocaleString()}
+          By ${p.author?.username || "Unknown"} on ${new Date(
+        p.createdAt
+      ).toLocaleString()}
         </small>`;
       postsList.appendChild(div);
     });
@@ -413,6 +429,7 @@ async function loadPosts(category = "All", hideDemos = false) {
     showAlert("Failed to load posts. Check console.", "error");
   }
 }
+
 
 async function createPost() {
   const token = localStorage.getItem("token");
