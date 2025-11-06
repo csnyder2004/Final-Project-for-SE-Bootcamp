@@ -472,3 +472,14 @@ async function viewDemoData() {
     showAlert("Failed to connect to server.", "error");
   }
 }
+/* =========================================================
+   🌡️ Keep Render Backend Awake (heartbeat ping)
+   ========================================================= */
+setInterval(async () => {
+  try {
+    await fetch(`${API_URL}/posts`, { method: "GET" });
+    console.log("💓 Pinged backend to keep it awake");
+  } catch (err) {
+    console.warn("⚠️ Backend ping failed (server may be restarting)");
+  }
+}, 240000); // every 4 minutes
