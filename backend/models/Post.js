@@ -22,10 +22,17 @@ const postSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      default: "General",
+      default: "Game Day Talk",
       trim: true,
       index: true,
-      enum: ["General", "Tech", "Gaming", "Education", "Misc"],
+      enum: [
+        "Game Day Talk",
+        "Players & Recruiting",
+        "Stats & Analysis",
+        "Vols History",
+        "SEC Rivalries",
+        "Fan Zone",
+      ],
     },
 
     // 👤 Linked Author
